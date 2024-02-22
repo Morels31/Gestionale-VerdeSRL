@@ -13,4 +13,4 @@ Nell’ambito di un ordine è di interesse sapere a quale indirizzo questo deve 
 Il listino prezzi, in cui si vuole tener traccia dei prezzi assunti nel tempo da ciascuna specie di piante.
 Una variazione di prezzo non deve avere effetto su un ordine già aperto ma non ancora finalizzato. I prezzi sono gestiti dai manager di Verde S.r.l.
 
-### Work in non progress (For now)
+### Work in progress

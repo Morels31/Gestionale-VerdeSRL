@@ -55,7 +55,7 @@ void shellManager(MYSQL *conn){
 	initSetPrezzo(conn, &setPrezzo);
 	initChangePassword(conn, &changePassword);
 
-	printf("Successfully logged in as a manager.\n\n");
+	printf("\nSuccessfully logged in as a manager.\n\n");
 
 
 	unsigned loop = 1;

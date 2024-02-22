@@ -30,13 +30,6 @@ MYSQL_BIND getBindParam(enum enum_field_types type, void *buffer, unsigned long 
 
 
 
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <stddef.h>
-#include <sys/types.h>
-
-
-
 /*
  *  Reads from a file named 'filename',
  *  and writes the result to the char buffer pointed by 'buffer'.
@@ -105,27 +98,30 @@ void writeToFile(char *str, char *filename){
  *
  *    'dbInfo' = pointer to a struct where the info will be imported
  *
+ *    returns how many option files are not present
  */
 
-void importDBInfo(dbI *dbInfo){
+unsigned importDBInfo(dbI *dbInfo){
 	if(!dbInfo) error("NULL argument");
-	int tmp;
+	unsigned notReaded = 0;
 
-	tmp = readFromFile(dbInfo->hostname, MAX_HOSTNAME_LEN, DB_HOSTNAME_FILE);
-	if(!tmp && checkHostname(dbInfo->hostname)) err("imported hostname is invalid");
+	notReaded += readFromFile(dbInfo->hostname, MAX_HOSTNAME_LEN, DB_HOSTNAME_FILE);
+	if(!notReaded && checkHostname(dbInfo->hostname)) err("imported hostname is invalid");
 
-	tmp = readFromFile(dbInfo->dbName, MAX_DB_NAME_LEN, DB_NAME_FILE);
-	if(!tmp && checkDBName(dbInfo->dbName)) err("imported database name is invalid");
+	notReaded += readFromFile(dbInfo->dbName, MAX_DB_NAME_LEN, DB_NAME_FILE);
+	if(!notReaded && checkDBName(dbInfo->dbName)) err("imported database name is invalid");
 
 	char buff[BUFF_LEN];
-	tmp = readFromFile(buff, BUFF_LEN-1, DB_PORT_FILE);
+	notReaded += readFromFile(buff, BUFF_LEN-1, DB_PORT_FILE);
 	
 	errno = 0;
 	unsigned long port = strtoul(buff, NULL, 10);
 	if(errno) error("strtoul() failed");
 
-	if(!tmp && checkPort(port)) err("imported port number is invalid");
+	if(!notReaded && checkPort(port)) err("imported port number is invalid");
 	dbInfo->port = port;
+
+	return notReaded;
 }
 
 

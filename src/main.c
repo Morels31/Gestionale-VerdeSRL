@@ -57,13 +57,11 @@ MYSQL *dbLogin(dbI *dbInfo){
 		readUsername("Enter Username: ", dbInfo->username);
 		readPassword("Enter Password: ", dbInfo->password);
 
-		if(mysql_real_connect(conn, dbInfo->hostname, dbInfo->username, dbInfo->password, dbInfo->dbName, dbInfo->port, NULL, 0)){
-			printf("Successfully connected to the database!\n");
-			break;
-		}
+		if(mysql_real_connect(conn, dbInfo->hostname, dbInfo->username, dbInfo->password, dbInfo->dbName, dbInfo->port, NULL, 0)) break;
+
 		if(mysql_errno(conn)!=1045) mysqlErr(conn);
 		sleep(3);
-		printf("Wrong credentials. Retry\n\n");
+		printf("\nWrong credentials. Retry\n\n");
 	
 	}
 	return conn;
@@ -80,13 +78,18 @@ int main(int argc, char **argv){
 	err("The installed mysql version is not supported, update it.");
 #endif
 
-	importDBInfo(&dbInfo);
-	unsigned nOpt = parseCmdLine(argc, argv, &dbInfo);
+	unsigned nOptNotImported = importDBInfo(&dbInfo);
+	unsigned nOptSpecified = parseCmdLine(argc, argv, &dbInfo);
+
+	if(nOptNotImported==3 && !nOptSpecified){
+		printf("Warning: no connection options specified, using defaults.\n");
+		printf("Execute \"%s -?\" for the help message.\n\n\n", argv[0]);
+	}
 
 	MYSQL *conn = dbLogin(&dbInfo);
 
 	char buffer[BUFF_LEN];
-	if(nOpt){
+	if(nOptSpecified){
 		readLine("Do you want to save/overwrite the database connection options? (hostname, port, dbName) [Y/n]: ", "?", BUFF_LEN-1, buffer, NULL);
 		if(buffer[0]!='n'){
 			exportDBInfo(&dbInfo);
@@ -103,6 +106,8 @@ int main(int argc, char **argv){
 	if(!strcmp(role, "manager")) shellManager(conn);
 	if(!strcmp(role, "magazzino")) shellMagazzino(conn);
 	//if(!strcmp(role, "segreteria")) shellSegreteria(conn);
+
+	//Controllare se il ruolo non è null
 
 	mysql_close(conn);
 
