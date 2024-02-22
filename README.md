@@ -1,4 +1,4 @@
-# Sistema per la gestione della vendita all’ingrosso di piante
+## Sistema per la gestione della vendita all’ingrosso di piante
 
 L’azienda Verde S.r.l. gestisce la vendita all’ingrosso di piante da interni ed esterni. L’azienda tratta diverse specie di piante, ciascuna caratterizzata sia dal nome latino che dal nome comune, e da un codice univoco alfanumerico attraverso cui la specie viene identificata. Per ciascuna specie è inoltre noto se sia tipicamente da giardino o da appartamento e se sia una specie esotica o meno. Le piante possono essere verdi oppure fiorite. Nel caso di specie di piante fiorite, sono note tutte le colorazioni in cui una specie è disponibile.
 
@@ -13,4 +13,4 @@ Nell’ambito di un ordine è di interesse sapere a quale indirizzo questo deve 
 Il listino prezzi, in cui si vuole tener traccia dei prezzi assunti nel tempo da ciascuna specie di piante.
 Una variazione di prezzo non deve avere effetto su un ordine già aperto ma non ancora finalizzato. I prezzi sono gestiti dai manager di Verde S.r.l.
 
-### Work in non progress
+### Work in non progress (For now)
