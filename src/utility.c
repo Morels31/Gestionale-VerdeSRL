@@ -99,7 +99,7 @@ char *readLine(char *askStr, char *errStr, int maxLen, char *optionalDest, size_
  */
 
 
-unsigned choice(char *askStr, ...){
+unsigned multipleChoice(char *askStr, ...){
 	va_list argptr;
 	unsigned index;
 	char *str;
@@ -195,7 +195,12 @@ void readPassword(char *askStr, char *dest){
 
 
 
-
+/*
+ *  Reads a "nomeLatino" and a "Colore"
+ *  saving them in the corrispective already allocated buffer
+ *	(optionally saving the result lengths)
+ *
+ */
 
 void readPKSpecie(char *nomeLatino, char *colore, size_t *sizeNomeLatino, size_t *sizeColore){
 
@@ -205,18 +210,51 @@ void readPKSpecie(char *nomeLatino, char *colore, size_t *sizeNomeLatino, size_t
 }
 
 
-void readInt(char *askStr, int *dest){
+/*
+ *  reads an integer input from the user
+ *
+ *    'askStr' = string that will be printed before user input.
+ *    'dest' = pointer to an integer where the result will be saved
+ */
+
+void readInt(char *askStr, long *dest){
 	char buff[BUFF_LEN];
 
 	while(1){
 		while(!readLine(askStr, "String too long.\n\n", BUFF_LEN-1, buff, NULL)) printf("The input can't be empty.\n\n");
 
-		*dest = atoi(buff);
-		if(*dest) break;
-		printf("An invalid value or 0 has been inserted, retry..\n\n");
+		errno = 0;
+		*dest = strtol(buff, NULL, 10);
+		if(!errno) break;
+		printf("An invalid value has been inserted, retry..\n\n");
 	}
 }
 
+
+
+
+/*
+ *  Asks the user to select beetween two choices,
+ *  (case insensitive)
+ *
+ *    'askStr' = string that will be printed before user input.
+ *    'choice1' = first option
+ *    'choice1' = second option
+ *
+ *    returns 1 if choice1 is selected,
+ *    returns 0 if choice2 is selected, or,
+ *    returns -1 for an empty input
+ */
+
+int choice(char *askStr, char *choice1, char *choice2){
+	char buff[BUFF_LEN];
+	while(1){
+		if(!readLine(askStr, "String too long.\n\n", BUFF_LEN-1, buff, NULL)) return -1;
+		if(!strcasecmp(buff, choice1)) return 1;
+		if(!strcasecmp(buff, choice2)) return 0;
+		printf("\nInvalid input, retry...\n\n");
+	}
+}
 
 
 

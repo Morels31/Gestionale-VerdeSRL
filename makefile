@@ -1,7 +1,7 @@
 
 COMMON_PATH := src
 
-SRC_FILES := main.c utility.c db_utility.c statements.c shells/magazzino.c
+SRC_FILES := main.c utility.c db_utility.c statements.c shells/magazzino.c shells/manager.c
 HEADER_FILES := $(SRC_FILES:.c=.h) common.h
 OBJ_FILES := $(SRC_FILES:.c=.o)
 

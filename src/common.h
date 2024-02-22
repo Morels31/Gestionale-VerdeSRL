@@ -43,6 +43,18 @@
 	exit(4); \
 }
 
+#define stmtErr(stmt, str){ \
+	fprintf (stderr, "STMT_ERROR: %s.\n", str); \
+	if(stmt){ \
+		if(mysql_stmt_sqlstate(stmt)[0]=='4' && mysql_stmt_sqlstate(stmt)[1]=='5'){ \
+			fprintf (stderr, "Warning (%s): %s\n", mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt)); \
+			return 1; \
+		} \
+		fprintf (stderr, "Error %u (%s): %s\n", mysql_stmt_errno(stmt), mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt)); \
+	} \
+	exit(5); \
+}
+
 #define stmtError(stmt, str){ \
 	fprintf (stderr, "STMT_ERROR: %s.\n", str); \
 	if(stmt) fprintf (stderr, "Error %u (%s): %s\n", mysql_stmt_errno(stmt), mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt)); \
@@ -71,14 +83,16 @@
 #define MAX_USERNAME_LEN 128
 #define MIN_PASSWORD_LEN 7
 #define MAX_PASSWORD_LEN 80
-#define HASH_LEN 86
+#define MAX_ROLE_LEN 25
 
 #define MAX_NOME_LATINO_LEN 100
 #define MAX_COLORE_LEN 30
+#define MAX_NOME_COMUNE_LEN 50
+#define MAX_IVA_LEN 15
+#define MAX_CONTATTO_LEN 15
+#define MAX_NOME_FORNITORE_LEN 50
 
 
-/* Has to be bigger than the longest DB role name */
-#define MAX_ROLE_LEN 20
 
 /* Has to be bigger than the biggest MAX_*_LEN value +1 */
 #define BUFF_LEN 1024

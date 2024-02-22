@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS prod.Specie(
     colore CHAR(30) NOT NULL,
     nomeComune VARCHAR(50) NOT NULL,
     giacenza INT NOT NULL DEFAULT 0,
-    prezzo MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+    prezzo INT UNSIGNED NOT NULL DEFAULT 0,
     esotica BOOLEAN NOT NULL,
     giardAppart ENUM('giardino', 'appartamento') NOT NULL,
     PRIMARY KEY(nomeLatino, colore)
@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS prod.EmailRivendita(
 
 
 CREATE TABLE IF NOT EXISTS prod.Fornitore(
-    idFornitore MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    idFornitore INT UNSIGNED NOT NULL AUTO_INCREMENT,
     nomeFornitore VARCHAR(50) NOT NULL,
     codFisc VARCHAR(20) NOT NULL,
     PRIMARY KEY(idFornitore)
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS prod.Fornitore(
 
 
 CREATE TABLE IF NOT EXISTS prod.IndirizzoFornitore(
-    idFornitore MEDIUMINT UNSIGNED NOT NULL,
+    idFornitore INT UNSIGNED NOT NULL,
     indirizzo VARCHAR(50) NOT NULL,
     PRIMARY KEY(idFornitore, indirizzo),
     FOREIGN KEY(idFornitore) REFERENCES Fornitore(idFornitore)
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS prod.IndirizzoFornitore(
 
 
 CREATE TABLE IF NOT EXISTS prod.Fornisce(
-    idFornitore MEDIUMINT UNSIGNED NOT NULL,
+    idFornitore INT UNSIGNED NOT NULL,
     nomeLatino CHAR(100) NOT NULL,
     colore CHAR(30) NOT NULL,
     PRIMARY KEY(idFornitore, nomeLatino, colore),
@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS prod.ContieneVendita(
     idVendita INT UNSIGNED NOT NULL,
     nomeLatino CHAR(100) NOT NULL,
     colore CHAR(30) NOT NULL,
-    quantita MEDIUMINT UNSIGNED NOT NULL,
+    quantita INT UNSIGNED NOT NULL,
     PRIMARY KEY(idVendita, nomeLatino, colore),
     FOREIGN KEY(idVendita) REFERENCES OrdineVendita(idVendita),
     FOREIGN KEY(nomeLatino, colore) REFERENCES Specie(nomeLatino, colore)
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS prod.ContieneVendita(
 
 CREATE TABLE IF NOT EXISTS prod.OrdineAcquisto(
     idAcquisto INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    idFornitore MEDIUMINT UNSIGNED NOT NULL,
+    idFornitore INT UNSIGNED NOT NULL,
     PRIMARY KEY(idAcquisto),
     FOREIGN KEY(idFornitore) REFERENCES Fornitore(idFornitore)
 );
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS prod.ContieneAcquisto(
     idAcquisto INT UNSIGNED NOT NULL,
     nomeLatino CHAR(100) NOT NULL,
     colore CHAR(30) NOT NULL,
-    quantita MEDIUMINT UNSIGNED NOT NULL,
+    quantita INT UNSIGNED NOT NULL,
     PRIMARY KEY(idAcquisto, nomeLatino, colore),
     FOREIGN KEY(idAcquisto) REFERENCES OrdineAcquisto(idAcquisto),
     FOREIGN KEY(nomeLatino, colore) REFERENCES Specie(nomeLatino, colore)
@@ -118,11 +118,6 @@ CREATE TABLE IF NOT EXISTS prod.ContieneAcquisto(
 
 
 
-INSERT INTO Specie (nomeLatino, colore, nomeComune, prezzo, esotica, giardAppart) VALUES ("Basilicus", "", "Basilico", 500, 1, "giardino");
-INSERT INTO Specie (nomeLatino, colore, nomeComune, prezzo, esotica, giardAppart) VALUES ("Prezzemolus", "", "Prezzemolo", 300, 1, "giardino");
-
-
-
 
 -----------------------------------
 --  Correctly adds a new species --
@@ -130,9 +125,10 @@ INSERT INTO Specie (nomeLatino, colore, nomeComune, prezzo, esotica, giardAppart
 
 DELIMITER $$$
 
-CREATE OR REPLACE PROCEDURE addSpecie(IN nLatino CHAR(100), IN col CHAR(30), IN nComune VARCHAR(50), IN esotic BOOLEAN, giardApp ENUM('giardino', 'appartamento'), IN fiorita BOOLEAN)
+CREATE OR REPLACE PROCEDURE addSpecie(IN nLatino CHAR(100), IN col CHAR(30), IN nComune VARCHAR(50), IN esotic BOOLEAN, IN giardino BOOLEAN, IN fiorita BOOLEAN)
     BEGIN
         DECLARE n INT UNSIGNED DEFAULT 3103;
+        DECLARE giardApp CHAR(15);
 
         DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -165,6 +161,13 @@ CREATE OR REPLACE PROCEDURE addSpecie(IN nLatino CHAR(100), IN col CHAR(30), IN 
             IF( n != 0 ) THEN
                 SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = "Invalid operation";
             END IF;
+
+
+            if( giardino = true ) THEN
+                SET giardApp = 'giardino';
+            ELSE
+                SET giardApp = 'appartamento';
+            END IF;
                 
         
             INSERT INTO Specie (nomeLatino, colore, nomeComune, esotica, giardAppart)
@@ -178,10 +181,13 @@ DELIMITER ;
 
 
 
+-----------------------------------
+--  Sets a new price to a specie --
+-----------------------------------
 
 DELIMITER $$$
 
-CREATE OR REPLACE PROCEDURE setPrezzo(IN nLatino CHAR(100), IN col CHAR(30), IN newPrezzo MEDIUMINT UNSIGNED)
+CREATE OR REPLACE PROCEDURE setPrezzo(IN nLatino CHAR(100), IN col CHAR(30), IN newPrezzo INT UNSIGNED)
     BEGIN
         DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -206,6 +212,9 @@ DELIMITER ;
 
 
 
+---------------------------------------------------------
+-- Aggiorna in modo relativo le giacenza di una specie --
+---------------------------------------------------------
 
 DELIMITER $$$
 
@@ -258,8 +267,9 @@ DELIMITER ;
 
 
 
-
-
+---------------------------------------------------------
+-- Returns all the fornitore that sells a given specie --
+---------------------------------------------------------
 
 DELIMITER $$$
 
@@ -289,11 +299,13 @@ DELIMITER ;
 
 
 
-
+-----------------------------
+-- Creates a new buy order --
+-----------------------------
 
 DELIMITER $$$
 
-CREATE OR REPLACE PROCEDURE newBuyOrder(IN idForn MEDIUMINT UNSIGNED, OUT newBuyOrderId INT UNSIGNED)
+CREATE OR REPLACE PROCEDURE newBuyOrder(IN idForn INT UNSIGNED, OUT newBuyOrderId INT UNSIGNED)
     BEGIN
         DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -316,6 +328,9 @@ DELIMITER ;
 
 
 
+----------------------------------
+-- Adds a specie to a buy order --
+----------------------------------
 
 DELIMITER $$$
 
@@ -356,6 +371,9 @@ DELIMITER ;
 
 
 
+------------------------------
+-- Creates a new sell order --
+------------------------------
 
 DELIMITER $$$
 
@@ -383,6 +401,9 @@ DELIMITER ;
 
 
 
+----------------------------------
+-- Adds a specie to a buy order --
+----------------------------------
 
 DELIMITER $$$
 
@@ -430,6 +451,9 @@ DELIMITER ;
 
 
 
+--------------------------------------------------
+-- Returns the total cost of a given sell order --
+--------------------------------------------------
 
 DELIMITER $$$
 
@@ -456,6 +480,10 @@ $$$
 DELIMITER ;
 
 
+
+--------------------------
+-- Confirms a buy order --
+--------------------------
 
 DELIMITER $$$
 
@@ -485,39 +513,41 @@ DELIMITER ;
 
 
 
-
-
-
-
-
-
-
-
-
--- DA FARE PER BENE
-
 CREATE OR REPLACE ROLE amministratore;
-GRANT EXECUTE ON PROCEDURE prod.editGiacenza TO amministratore;
 GRANT SELECT,INSERT,UPDATE,DELETE ON mysql.* TO amministratore WITH GRANT OPTION;
-GRANT SELECT,INSERT,UPDATE ON prod.* TO amministratore WITH GRANT OPTION;
+GRANT SELECT ON prod.Specie TO amministratore WITH GRANT OPTION;
+GRANT EXECUTE ON PROCEDURE prod.addSpecie TO amministratore WITH GRANT OPTION;
+GRANT EXECUTE ON PROCEDURE prod.setPrezzo TO amministratore WITH GRANT OPTION;
+GRANT EXECUTE ON PROCEDURE prod.editGiacenza TO amministratore WITH GRANT OPTION;
+GRANT EXECUTE ON PROCEDURE prod.getFornitoriForSpecie TO amministratore WITH GRANT OPTION;
+GRANT EXECUTE ON PROCEDURE prod.newBuyOrder TO amministratore WITH GRANT OPTION;
+GRANT EXECUTE ON PROCEDURE prod.addSpecieToBuyOrder TO amministratore WITH GRANT OPTION;
+GRANT EXECUTE ON PROCEDURE prod.newSellOrder TO amministratore WITH GRANT OPTION;
+GRANT EXECUTE ON PROCEDURE prod.addSpecieToSellOrder TO amministratore WITH GRANT OPTION;
+GRANT EXECUTE ON PROCEDURE prod.getCostoOrdine TO amministratore WITH GRANT OPTION;
+GRANT EXECUTE ON PROCEDURE prod.confirmPayment TO amministratore WITH GRANT OPTION;
 
 CREATE OR REPLACE ROLE manager WITH ADMIN amministratore;
-GRANT SELECT,INSERT ON prod.Specie TO manager;
-GRANT UPDATE(prezzo) ON prod.Specie TO manager;
+GRANT SELECT ON prod.Specie TO manager;
+GRANT EXECUTE ON PROCEDURE prod.addSpecie TO manager;
+GRANT EXECUTE ON PROCEDURE prod.setPrezzo TO manager;
+
 
 CREATE OR REPLACE ROLE magazzino WITH ADMIN amministratore;
 GRANT SELECT ON prod.Specie TO magazzino;
-GRANT UPDATE(giacenza) ON prod.Specie TO magazzino;
-GRANT SELECT ON prod.Fornisce TO magazzino;
-GRANT SELECT ON prod.Fornitore TO magazzino;
-GRANT SELECT,INSERT ON prod.OrdineAcquisto TO magazzino;
-GRANT SELECT,INSERT ON prod.ContieneAcquisto TO magazzino;
+GRANT EXECUTE ON PROCEDURE prod.editGiacenza TO magazzino;
+GRANT EXECUTE ON PROCEDURE prod.getFornitoriForSpecie TO magazzino;
+GRANT EXECUTE ON PROCEDURE prod.newBuyOrder TO magazzino;
+GRANT EXECUTE ON PROCEDURE prod.addSpecieToBuyOrder TO magazzino;
+
 
 CREATE OR REPLACE ROLE segreteria WITH ADMIN amministratore;
 GRANT SELECT ON prod.Specie TO segreteria;
-GRANT SELECT ON prod.Rivendita TO segreteria;
-GRANT SELECT,INSERT ON prod.OrdineVendita TO segreteria;
-GRANT SELECT,INSERT ON prod.ContieneVendita TO segreteria;
+GRANT EXECUTE ON PROCEDURE prod.newSellOrder TO segreteria;
+GRANT EXECUTE ON PROCEDURE prod.addSpecieToSellOrder TO segreteria;
+GRANT EXECUTE ON PROCEDURE prod.getCostoOrdine TO segreteria;
+GRANT EXECUTE ON PROCEDURE prod.confirmPayment TO segreteria;
+
 
 
 
@@ -527,11 +557,6 @@ CREATE OR REPLACE USER admin IDENTIFIED BY 'CHANGEME';
 GRANT amministratore TO admin;
 SET DEFAULT ROLE amministratore FOR admin;
 
-
-
-
-CREATE OR REPLACE USER test IDENTIFIED BY 'test';
-GRANT segreteria TO test;
-SET DEFAULT ROLE segreteria FOR test;
-
-
+CREATE OR REPLACE USER test IDENTIFIED BY 'password';
+GRANT manager TO test;
+SET DEFAULT ROLE manager FOR test;
