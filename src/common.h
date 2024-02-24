@@ -47,7 +47,7 @@
 	fprintf (stderr, "STMT_ERROR: %s.\n", str); \
 	if(stmt){ \
 		if(mysql_stmt_sqlstate(stmt)[0]=='4' && mysql_stmt_sqlstate(stmt)[1]=='5'){ \
-			fprintf (stderr, "Warning (%s): %s\n", mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt)); \
+			fprintf (stderr, "Warning (%s): %s\n\n", mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt)); \
 			return 1; \
 		} \
 		fprintf (stderr, "Error %u (%s): %s\n", mysql_stmt_errno(stmt), mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt)); \
