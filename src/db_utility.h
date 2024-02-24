@@ -13,4 +13,3 @@ int readFromFile(char *buffer, int maxLen, char *filename);
 void writeToFile(char *str, char *filename);
 unsigned importDBInfo(dbI *dbInfo);
 void exportDBInfo(dbI *dbInfo);
-void runQuery(MYSQL *conn, char *query);

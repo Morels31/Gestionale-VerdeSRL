@@ -23,7 +23,8 @@ void askAddSpecie(void){
 	while(-1 == (addSpecie.fiorita = choice("Select beetween the two [fiorita/verde]: ", "fiorita", "verde"))) printf("There is no default option, retry..\n"); 
 
 
-	if(!execGenericStmt((void *) &addSpecie, NULL)) printf("\nNew Specie added correctly\n\n");
+	//if(!execGenericStmt((void *) &addSpecie, NULL)) printf("\nNew Specie added correctly\n\n");
+	if(!EXEC_STMT(addSpecie)) printf("\nNew Specie added correctly\n\n");
 }
 
 
@@ -33,7 +34,7 @@ void askSetPrezzo(void){
 
 	readInt("Insert new price: ", &setPrezzo.newPrezzo);
 
-	if(!execGenericStmt((void *) &setPrezzo, NULL)) printf("\nNew Price set correctly\n\n");
+	if(!EXEC_STMT(setPrezzo)) printf("\nNew Price set correctly\n\n");
 }
 
 
@@ -43,7 +44,7 @@ void askChangePassword(void){
 	readPassword("Insert new password: ", changePassword.newPsw);
 	changePassword.inParams[0].buffer_length = strlen(changePassword.newPsw);
 
-	if(!execGenericStmt((void *) &changePassword, NULL)) printf("\nPassword changed successfully\n\n");
+	if(!EXEC_STMT(changePassword)) printf("\nPassword changed successfully\n\n");
 }
 
 

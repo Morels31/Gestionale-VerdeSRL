@@ -20,14 +20,15 @@ void shellMagazzino(MYSQL *conn){
 
 	readInt("Insert how much to modify the stock (with minus or plus signs): ", &editGiacenza.diffGiacenza);
 
-	execGenericStmt((void *)&editGiacenza, NULL);
+	EXEC_STMT(editGiacenza);
 
 
 
 	printf("Si\n");
 	newBuyOrder.idFornitore = 1;
 
-	execGenericStmt((void *)&newBuyOrder, &newBuyOrder.outParams[0]);
+	//execGenericStmt((void *)&newBuyOrder, &newBuyOrder.outParams[0]);
+	EXEC_STMT(newBuyOrder);
 
 	mysql_stmt_fetch(newBuyOrder.stmt);
 	printf("%lu\n", newBuyOrder.outBuyOrderId);
