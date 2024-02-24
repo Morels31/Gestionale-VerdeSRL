@@ -6,14 +6,16 @@
 
 
 
-int execGenericStmt(genericStmtStruct *st, MYSQL_BIND *optionalOutParams){
+int execStmt(MYSQL_STMT *stmt, MYSQL_BIND *inParams, MYSQL_BIND *outParams){
 
-	if(mysql_stmt_bind_param(st->stmt, st->inParams)) stmtError(st->stmt, "mysql_stmt_bind_param() failed");
+	if(inParams){
+		if(mysql_stmt_bind_param(stmt, inParams)) stmtError(stmt, "mysql_stmt_bind_param() failed");
+	}
 
-	if(mysql_stmt_execute(st->stmt)) stmtErr(st->stmt, "mysql_stmt_execute() failed");
+	if(mysql_stmt_execute(stmt)) stmtErr(stmt, "mysql_stmt_execute() failed");
 
-	if(optionalOutParams){
-		if(mysql_stmt_bind_result(st->stmt, optionalOutParams)) stmtError(st->stmt, "mysql_stmt_bind_result() failed");
+	if(outParams){
+		if(mysql_stmt_bind_result(stmt, outParams)) stmtError(stmt, "mysql_stmt_bind_result() failed");
 	}
 	return 0;
 }
