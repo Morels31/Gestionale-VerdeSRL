@@ -147,13 +147,3 @@ void exportDBInfo(dbI *dbInfo){
 	sprintf(buff, "%u", dbInfo->port);
 	writeToFile(buff, DB_PORT_FILE);
 }
-
-
-
-void runQuery(MYSQL *conn, char *query){
-	/* Qui si potrebbe usare mysql_real_query che e' binary safe */
-	if(mysql_query(conn, query))
-		mysqlError(conn, "mysql_real_query() failed");
-}
-
-
