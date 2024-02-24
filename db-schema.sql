@@ -142,7 +142,7 @@ CREATE OR REPLACE PROCEDURE addSpecie(IN nLatino CHAR(100), IN col CHAR(30), IN 
             
             IF( fiorita = true ) THEN
                 IF( col = "" ) THEN
-                    SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = "Invalid operation";
+                    SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = "Cannot have an empty string to a specie fiorita";
                 END IF;
                 SELECT COUNT(*) INTO n
                     FROM Specie
@@ -150,7 +150,7 @@ CREATE OR REPLACE PROCEDURE addSpecie(IN nLatino CHAR(100), IN col CHAR(30), IN 
                     AND colore = "";
             ELSE
                 IF( col != "" ) THEN
-                    SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = "Invalid operation";
+                    SIGNAL SQLSTATE '45103' SET MESSAGE_TEXT = "Color of a specie verde has to be an empty string";
                 END IF;
                 SELECT COUNT(*) INTO n
                     FROM Specie
@@ -159,7 +159,7 @@ CREATE OR REPLACE PROCEDURE addSpecie(IN nLatino CHAR(100), IN col CHAR(30), IN 
             END IF;
 
             IF( n != 0 ) THEN
-                SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = "Invalid operation";
+                SIGNAL SQLSTATE '45203' SET MESSAGE_TEXT = "Wrong specie's type";
             END IF;
 
 
