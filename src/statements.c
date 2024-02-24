@@ -6,7 +6,7 @@
 
 
 
-int execStmt(MYSQL_STMT *stmt, MYSQL_BIND *inParams, MYSQL_BIND *outParams){
+int execStmt(MYSQL_STMT *stmt, MYSQL_BIND *inParams, MYSQL_BIND *outParams, int (*postExecFunc)(MYSQL_STMT *)){
 
 	if(inParams){
 		if(mysql_stmt_bind_param(stmt, inParams)) stmtError(stmt, "mysql_stmt_bind_param() failed");
@@ -17,14 +17,31 @@ int execStmt(MYSQL_STMT *stmt, MYSQL_BIND *inParams, MYSQL_BIND *outParams){
 	if(outParams){
 		if(mysql_stmt_bind_result(stmt, outParams)) stmtError(stmt, "mysql_stmt_bind_result() failed");
 	}
+
+	if(postExecFunc){
+		return (*postExecFunc)(stmt);
+	}
+
 	return 0;
 }
 
 
+int saveOutput(MYSQL_STMT *stmt){
+	if(mysql_stmt_store_result(stmt)) stmtError(stmt, "mysql_stmt_store_result() failed");
 
-// E' da testare come funzionano bene i parametri di out
-// perchè mi sà che bisogna bindarli da subito e chiamare bind anche con gli OUT
-
+	//potrebbero non esserci risultati
+	int tmp = mysql_stmt_fetch(stmt);
+	if(tmp){
+		if(tmp==MYSQL_NO_DATA){
+			printf("Received empty result\n\n");
+			if(mysql_stmt_reset(stmt)) stmtError(stmt, "mysql_stmt_reset() failed");
+			return 1;
+		}
+		stmtError(stmt, "mysql_stmt_fetch() failed");
+	}
+	mysql_stmt_reset(stmt);
+	return 0;
+}
 
 
 
@@ -39,6 +56,7 @@ void initAddSpecie(MYSQL *conn, addSpecieStruct *st){
 	st->inParams[4] = getBindParam(MYSQL_TYPE_TINY, &st->giardino, sizeof(st->giardino));
 	st->inParams[5] = getBindParam(MYSQL_TYPE_TINY, &st->fiorita, sizeof(st->fiorita));
 }
+
 
 
 
@@ -70,7 +88,7 @@ void initGetFornitoriForSpecie(MYSQL *conn, getFornitoriForSpecieStruct *st){
 	st->inParams[0] = getBindParam(MYSQL_TYPE_STRING, st->nomeLatino, 0);
 	st->inParams[1] = getBindParam(MYSQL_TYPE_STRING, st->colore, 0);
 	st->outParams[0] = getBindParam(MYSQL_TYPE_LONG, &st->outIdFornitore, sizeof(st->outIdFornitore));
-	st->outParams[1] = getBindParam(MYSQL_TYPE_VAR_STRING, st->outNomeFornitore, 0);
+	st->outParams[1] = getBindParam(MYSQL_TYPE_VAR_STRING, st->outNomeFornitore, MAX_NOME_FORNITORE_LEN);
 }
 
 
@@ -81,6 +99,8 @@ void initNewBuyOrder(MYSQL *conn, newBuyOrderStruct *st){
 
 	st->inParams[0] = getBindParam(MYSQL_TYPE_LONG, &st->idFornitore, sizeof(st->idFornitore));
 	st->outParams[0] = getBindParam(MYSQL_TYPE_LONG, &st->outBuyOrderId, sizeof(st->outBuyOrderId));
+
+	st->postExecFunc = &saveOutput;
 }
 
 
@@ -104,6 +124,8 @@ void initNewSellOrder(MYSQL *conn, newSellOrderStruct *st){
 	st->inParams[0] = getBindParam(MYSQL_TYPE_STRING, st->pIVA, 0);
 	st->inParams[1] = getBindParam(MYSQL_TYPE_VAR_STRING, st->contatto, 0);
 	st->outParams[0] = getBindParam(MYSQL_TYPE_LONG, &st->outSellOrderId, sizeof(st->outSellOrderId));
+
+	st->postExecFunc = &saveOutput;
 }
 
 
@@ -126,6 +148,8 @@ void initGetCostoOrdine(MYSQL *conn, getCostoOrdineStruct *st){
 
 	st->inParams[0] = getBindParam(MYSQL_TYPE_LONG, &st->sellOrderId, sizeof(st->sellOrderId));
 	st->outParams[0] = getBindParam(MYSQL_TYPE_LONG, &st->outCost, sizeof(st->outCost));
+
+	st->postExecFunc = &saveOutput;
 }
 
 
@@ -169,16 +193,20 @@ void initDropUser(MYSQL *conn, dropUserStruct *st){
 
 void initGetSpecie(MYSQL *conn, getSpecieStruct *st){
 
-	st->stmt = initStmt(conn, "SELECT nomeLatino, colore, nomeComune, giacenza, prezzo, esotica, giardAppart, CASE WHEN colore = '' THEN 'Verde' ELSE 'Fiorita' END AS verdeFiorita FROM Specie");
+	st->stmt = initStmt(conn, "SELECT nomeLatino FROM Specie");
 
-	st->outParams[0] = getBindParam(MYSQL_TYPE_STRING, st->nomeLatino, 0);
-	st->outParams[1] = getBindParam(MYSQL_TYPE_STRING, st->colore, 0);
-	st->outParams[2] = getBindParam(MYSQL_TYPE_VAR_STRING, st->nomeComune, 0);
+	st->outParams[0] = getBindParam(MYSQL_TYPE_STRING, st->nomeLatino, MAX_NOME_LATINO_LEN);
+	st->outParams[1] = getBindParam(MYSQL_TYPE_STRING, st->colore, MAX_COLORE_LEN);
+	st->outParams[2] = getBindParam(MYSQL_TYPE_VAR_STRING, st->nomeComune,MAX_NOME_COMUNE_LEN);
 	st->outParams[3] = getBindParam(MYSQL_TYPE_LONG, &st->giacenza, sizeof(st->giacenza));
 	st->outParams[4] = getBindParam(MYSQL_TYPE_LONG, &st->prezzo, sizeof(st->prezzo));
 	st->outParams[5] = getBindParam(MYSQL_TYPE_TINY, &st->esotica, sizeof(st->esotica));
-	st->outParams[6] = getBindParam(MYSQL_TYPE_STRING, st->giardAppart, 0);
-	st->outParams[7] = getBindParam(MYSQL_TYPE_STRING, st->verdeFiorita, 0);
+	st->outParams[6] = getBindParam(MYSQL_TYPE_STRING, st->giardAppart, MAX_GIARD_APPART_LEN);
+	st->outParams[7] = getBindParam(MYSQL_TYPE_STRING, st->verdeFiorita, MAX_VERDE_FIORITA_LEN);
+
+	
+	//testing. TODO: printResultSet() function
+	st->postExecFunc = &saveOutput;
 }
 
 

@@ -69,6 +69,8 @@ void shellManager(MYSQL *conn){
 				printf("There is no default\n\n");
 				break;
 			case 1:
+				EXEC_STMT(getSpecie);
+				printf(" - - - '%s' - - -\n", getSpecie.nomeLatino);
 				printf("Not yet implemented :<\n");
 				break;
 			case 2:

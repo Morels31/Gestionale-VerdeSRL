@@ -110,7 +110,7 @@ unsigned multipleChoice(char *askStr, ...){
 	while(42){
 
 		va_start(argptr, askStr);
-		printf("%s\n", askStr);
+		printf("\n%s\n", askStr);
 
 		index = 1;
 		str = va_arg(argptr, char *);
@@ -124,7 +124,7 @@ unsigned multipleChoice(char *askStr, ...){
 		va_end(argptr);
 		fflush(stdout);
 
-		if(!readLine("", invalidStr, 9, inputStr, NULL)) return 0;
+		if(!readLine("Enter a number: ", invalidStr, 9, inputStr, NULL)) return 0;
 
 		errno = 0;
 		inputNum = strtoul(inputStr, NULL, 10);
