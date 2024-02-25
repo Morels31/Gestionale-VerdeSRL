@@ -24,7 +24,7 @@ void askAddSpecie(void){
 
 
 	//if(!execGenericStmt((void *) &addSpecie, NULL)) printf("\nNew Specie added correctly\n\n");
-	if(!EXEC_STMT(addSpecie)) printf("\nNew Specie added correctly\n\n");
+	if(!EXEC_STMT(addSpecie)) printf("\nNew Specie added correctly\n");
 }
 
 
@@ -32,9 +32,9 @@ void askSetPrezzo(void){
 	readPKSpecie(setPrezzo.nomeLatino, setPrezzo.colore, \
 		&setPrezzo.inParams[0].buffer_length, &setPrezzo.inParams[1].buffer_length);
 
-	readInt("Insert new price: ", &setPrezzo.newPrezzo);
+	setPrezzo.newPrezzo = readInt("Insert new price: ", 0, MAX_MYSQL_UINT);
 
-	if(!EXEC_STMT(setPrezzo)) printf("\nNew Price set correctly\n\n");
+	if(!EXEC_STMT(setPrezzo)) printf("\nNew Price set correctly\n");
 }
 
 
@@ -44,7 +44,7 @@ void askChangePassword(void){
 	readPassword("Insert new password: ", changePassword.newPsw);
 	changePassword.inParams[0].buffer_length = strlen(changePassword.newPsw);
 
-	if(!EXEC_STMT(changePassword)) printf("\nPassword changed successfully\n\n");
+	if(!EXEC_STMT(changePassword)) printf("\nPassword changed successfully\n");
 }
 
 
@@ -60,14 +60,11 @@ void shellManager(MYSQL *conn){
 
 
 	unsigned loop = 1;
-	unsigned selection = 0;
+	unsigned selection;
 	while(loop){
 		selection = multipleChoice("\nSelect beetween those actions: ", "Get Specie", "Add Specie", "Set Prezzo Specie", "Change Password", "Quit", NULL);
 
 		switch(selection) {
-			case 0:
-				printf("There is no default\n\n");
-				break;
 			case 1:
 				EXEC_STMT(getSpecie);
 				break;

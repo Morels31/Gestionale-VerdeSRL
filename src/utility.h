@@ -14,7 +14,7 @@ unsigned multipleChoice(char *askStr, ...);
 void readUsername(char *askStr, char *dest);
 void readPassword(char *askStr, char *dest);
 void readPKSpecie(char *nomeLatino, char *colore, size_t *sizeNomeLatino, size_t *sizeColore);
-void readInt(char *askStr, long *dest);
+long long readInt(char *askStr, long long min, long long max);
 int choice(char *askStr, char *choice1, char *choice2);
 int checkGenericString(char *str, const char *charset, size_t maxSize);
 int checkUsername(char *username);

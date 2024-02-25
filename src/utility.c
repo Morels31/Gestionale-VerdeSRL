@@ -83,61 +83,6 @@ char *readLine(char *askStr, char *errStr, int maxLen, char *optionalDest, size_
 
 
 /*
- *  This variadic function takes in input multiple strings,
- *  and displays them like this:
- *
- *  'askStr'
- *      1: 'arg[1]'
- *      2: 'arg[2]'
- *      3: 'arg[3]'
- *      ...
- *
- *  And asks the user to select beetween the n options.
- *
- *    returns the selected number, or
- *    returns 0 if input is empty
- */
-
-
-unsigned multipleChoice(char *askStr, ...){
-	va_list argptr;
-	unsigned index;
-	char *str;
-	char inputStr[10];
-	unsigned long inputNum;
-	char invalidStr[] = "\n\n\nInvalid Number.\n\n";
-
-	while(42){
-
-		va_start(argptr, askStr);
-		printf("\n%s\n", askStr);
-
-		index = 1;
-		str = va_arg(argptr, char *);
-		if(!str) return -1;	//palmface
-
-		while (str) {
-			printf("\t%u: %s\n", index++, str);
-			str = va_arg(argptr, char *);
-		}
-
-		va_end(argptr);
-		fflush(stdout);
-
-		if(!readLine("\nEnter a number: ", invalidStr, 9, inputStr, NULL)) return 0;
-
-		errno = 0;
-		inputNum = strtoul(inputStr, NULL, 10);
-		if(errno) error("strtoul() failed");
-
-		if(inputNum > 0 && inputNum < index && inputNum < UINT_MAX) return (unsigned) inputNum;
-
-		printNow(invalidStr);
-	}
-}
-
-
-/*
  *  Reads an username from the user, checks its validity,
  *  and then, if its valid, saves it in the already allocated 'dest' char buffer.
  *  (that has to be at least MAX_USERNAME_LEN+1 chars)
@@ -210,26 +155,37 @@ void readPKSpecie(char *nomeLatino, char *colore, size_t *sizeNomeLatino, size_t
 }
 
 
+
 /*
  *  reads an integer input from the user
  *
  *    'askStr' = string that will be printed before user input.
- *    'dest' = pointer to an integer where the result will be saved
+ *    'min' = minimum (included) accetable int.
+ *    'max' = maximum (included) accetable int.
+ *
+ *    returns the converted readed integer
  */
 
-void readInt(char *askStr, long *dest){
+long long readInt(char *askStr, long long min, long long max){
+	long long res;
 	char buff[BUFF_LEN];
+	char *p;
 
 	while(1){
 		while(!readLine(askStr, "String too long.\n\n", BUFF_LEN-1, buff, NULL)) printf("The input can't be empty.\n\n");
 
 		errno = 0;
-		*dest = strtol(buff, NULL, 10);
-		if(!errno) break;
-		printf("An invalid value has been inserted, retry..\n\n");
+		res = strtoll(buff, &p, 10);
+		if(errno || *buff=='\0' || *p!='\0'){
+			printf("An invalid value has been inserted, retry...\n\n");
+		}
+		else{
+			if(res >= min && res <= max) break;
+			printf("The inserted number is outside the valid range of [%lld, %lld]. retry...\n\n", min, max);
+		}
 	}
+	return res;
 }
-
 
 
 
@@ -257,6 +213,46 @@ int choice(char *askStr, char *choice1, char *choice2){
 }
 
 
+
+/*
+ *  This variadic function takes in input multiple strings,
+ *  and displays them like this:
+ *
+ *  'askStr'
+ *      1: 'arg[1]'
+ *      2: 'arg[2]'
+ *      3: 'arg[3]'
+ *      ...
+ *
+ *  And asks the user to select beetween the n options.
+ *
+ *    returns the selected number
+ */
+
+unsigned multipleChoice(char *askStr, ...){
+	va_list argptr;
+	unsigned index;
+	char *str;
+	char inputStr[10];
+
+	va_start(argptr, askStr);
+	printf("\n%s\n", askStr);
+
+	index = 1;
+	str = va_arg(argptr, char *);
+	if(!str) return -1;	//palmface
+
+	while (str) {
+		printf("\t%u: %s\n", index++, str);
+		str = va_arg(argptr, char *);
+	}
+
+	va_end(argptr);
+	putchar('\n');
+	fflush(stdout);
+
+	return readInt("Enter a number: ", 1, index-1);
+}
 
 
 

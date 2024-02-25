@@ -77,6 +77,9 @@
 #define PASSWORD_CHARSET "-_.!$<'>/#+-=()[]"
 #define HASH_CHARSET "./"
 
+#define MIN_MYSQL_INT (-((long long) 1<<31))
+#define MAX_MYSQL_INT (((long long) 1<<31) -1)
+#define MAX_MYSQL_UINT (((unsigned long long) 1<<32) -1)
 
 #define MAX_DB_NAME_LEN 64
 #define MAX_HOSTNAME_LEN 255

@@ -18,7 +18,7 @@ void shellMagazzino(MYSQL *conn){
 	readPKSpecie(editGiacenza.nomeLatino, editGiacenza.colore, \
 		&editGiacenza.inParams[0].buffer_length, &editGiacenza.inParams[1].buffer_length);
 
-	readInt("Insert how much to modify the stock (with minus or plus signs): ", &editGiacenza.diffGiacenza);
+	editGiacenza.diffGiacenza = readInt("Insert how much to modify the stock (with minus or plus signs): ", MIN_MYSQL_INT, MAX_MYSQL_INT);
 
 	EXEC_STMT(editGiacenza);
 
