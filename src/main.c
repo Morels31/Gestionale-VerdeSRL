@@ -86,6 +86,7 @@ int main(int argc, char **argv){
 		printf("Execute \"%s -?\" for the help message.\n\n\n", argv[0]);
 	}
 
+	putchar('\n');
 	MYSQL *conn = dbLogin(&dbInfo);
 
 	char buffer[BUFF_LEN];

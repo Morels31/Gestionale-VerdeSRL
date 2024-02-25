@@ -6,7 +6,7 @@
 
 
 
-int execStmt(MYSQL_STMT *stmt, MYSQL_BIND *inParams, MYSQL_BIND *outParams, int (*postExecFunc)(MYSQL_STMT *)){
+int execStmt(MYSQL_STMT *stmt, MYSQL_BIND *inParams, MYSQL_BIND *outParams, int (*postExecFunc)(MYSQL_STMT *, MYSQL_BIND *)){
 
 	if(inParams){
 		if(mysql_stmt_bind_param(stmt, inParams)) stmtError(stmt, "mysql_stmt_bind_param() failed");
@@ -19,14 +19,14 @@ int execStmt(MYSQL_STMT *stmt, MYSQL_BIND *inParams, MYSQL_BIND *outParams, int 
 	}
 
 	if(postExecFunc){
-		return (*postExecFunc)(stmt);
+		return (*postExecFunc)(stmt, outParams);
 	}
 
 	return 0;
 }
 
 
-int saveOutput(MYSQL_STMT *stmt){
+int saveOutput(MYSQL_STMT *stmt, MYSQL_BIND *ignored){
 	if(mysql_stmt_store_result(stmt)) stmtError(stmt, "mysql_stmt_store_result() failed");
 
 	//potrebbero non esserci risultati
@@ -39,9 +39,122 @@ int saveOutput(MYSQL_STMT *stmt){
 		}
 		stmtError(stmt, "mysql_stmt_fetch() failed");
 	}
-	mysql_stmt_reset(stmt);
+	if(mysql_stmt_reset(stmt)) stmtError(stmt, "mysql_stmt_reset() failed");
 	return 0;
 }
+
+void printBindedVar(MYSQL_BIND *bind, int padding){
+	if(bind->buffer_type == MYSQL_TYPE_STRING || bind->buffer_type == MYSQL_TYPE_VAR_STRING){
+		printf(" %-*s |", padding, bind->buffer);
+	}
+	else if(bind->buffer_type == MYSQL_TYPE_TINY){
+		if(bind->is_unsigned) printf(" %-*u |", padding, *(unsigned char *) bind->buffer);
+		else printf(" %-*d |", padding, *(char *)bind->buffer);
+	}
+	else if(bind->buffer_type == MYSQL_TYPE_LONG){
+		if(bind->is_unsigned) printf(" %-*lu |", padding, *(unsigned long *)bind->buffer);
+		else printf(" %-*ld |", padding, *(long *)bind->buffer);
+	}
+	else{
+		printf("ERROR: UNSUPPORTED VAR TYPE");
+	}
+}
+
+
+
+void printDashes(MYSQL_RES *meta){
+	MYSQL_FIELD *field;
+
+	putchar('+');
+	for(unsigned i=0; i<mysql_num_fields(meta); i++){
+
+		field = mysql_fetch_field_direct(meta, i);
+		for(unsigned j=0; j<field->max_length+2; j++) putchar('-');
+
+		putchar('+');
+	}
+	putchar('\n');
+}
+
+
+/*
+ *  Prints the header of the result set
+ *  (the name of the columns)
+ */
+
+void printResultSetHeader(MYSQL_RES *meta){
+	MYSQL_FIELD *field;
+	unsigned colLen, i;
+
+	unsigned nFields = mysql_num_fields(meta);
+	for(i=0; i<nFields; i++){
+
+		field = mysql_fetch_field_direct(meta, i);
+		colLen = strlen(field->name);
+
+		if(colLen < field->max_length) colLen = field->max_length;
+		if(colLen < 4 && !IS_NOT_NULL(field->flags)) colLen = 4;
+
+		field->max_length = colLen;
+	}
+
+	printDashes(meta);
+	putchar('|');
+
+	for(i=0; i<nFields; i++){
+
+		field = mysql_fetch_field_direct(meta, i);
+		printf(" %-*s |", (int)field->max_length, field->name);
+
+	}
+
+	putchar('\n');
+	printDashes(meta);
+}
+
+
+
+int printResultSet(MYSQL_STMT *stmt, MYSQL_BIND *outParams){
+	if(mysql_stmt_store_result(stmt)) stmtError(stmt, "mysql_stmt_store_result() failed");
+
+	MYSQL_RES *meta = mysql_stmt_result_metadata(stmt);
+	if(!meta){
+		printf("ERROR: no metadata exists for this prepared statement");
+		return 1;
+	}
+
+	unsigned nFields = mysql_stmt_field_count(stmt);
+	if(!nFields) err("this statement does not produce a result set!");
+
+	printf("\n\n");
+	printResultSetHeader(meta);
+
+	MYSQL_FIELD *field;
+	while(!mysql_stmt_fetch(stmt)){
+
+		putchar('|');
+		for(unsigned i=0; i<nFields; i++){
+
+			field = mysql_fetch_field_direct(meta, i);
+
+			if(outParams[i].is_null_value)
+				printf(" %-*s |", (int)field->max_length, "NULL");
+			else
+				printBindedVar(&outParams[i], (int)field->max_length);
+		}
+		putchar('\n');
+		printDashes(meta);
+	}
+
+	mysql_free_result(meta);
+	return 0;
+}
+
+
+
+
+
+
 
 
 
@@ -67,6 +180,7 @@ void initSetPrezzo(MYSQL *conn, setPrezzoStruct *st){
 	st->inParams[0] = getBindParam(MYSQL_TYPE_STRING, st->nomeLatino, 0);
 	st->inParams[1] = getBindParam(MYSQL_TYPE_STRING, st->colore, 0);
 	st->inParams[2] = getBindParam(MYSQL_TYPE_LONG, &st->newPrezzo, sizeof(st->newPrezzo));
+	st->inParams[2].is_unsigned = 1;
 }
 
 
@@ -100,6 +214,9 @@ void initNewBuyOrder(MYSQL *conn, newBuyOrderStruct *st){
 	st->inParams[0] = getBindParam(MYSQL_TYPE_LONG, &st->idFornitore, sizeof(st->idFornitore));
 	st->outParams[0] = getBindParam(MYSQL_TYPE_LONG, &st->outBuyOrderId, sizeof(st->outBuyOrderId));
 
+	st->inParams[0].is_unsigned = 1;
+	st->outParams[0].is_unsigned = 1;
+
 	st->postExecFunc = &saveOutput;
 }
 
@@ -113,6 +230,9 @@ void initAddSpecieToBuyOrder(MYSQL *conn, addSpecieToBuyOrderStruct *st){
 	st->inParams[1] = getBindParam(MYSQL_TYPE_STRING, st->colore, 0);
 	st->inParams[2] = getBindParam(MYSQL_TYPE_LONG, &st->quantita, sizeof(st->quantita));
 	st->inParams[3] = getBindParam(MYSQL_TYPE_LONG, &st->buyOrderId, sizeof(st->buyOrderId));
+
+	st->inParams[2].is_unsigned = 1;
+	st->inParams[3].is_unsigned = 1;
 }
 
 
@@ -124,6 +244,8 @@ void initNewSellOrder(MYSQL *conn, newSellOrderStruct *st){
 	st->inParams[0] = getBindParam(MYSQL_TYPE_STRING, st->pIVA, 0);
 	st->inParams[1] = getBindParam(MYSQL_TYPE_VAR_STRING, st->contatto, 0);
 	st->outParams[0] = getBindParam(MYSQL_TYPE_LONG, &st->outSellOrderId, sizeof(st->outSellOrderId));
+
+	st->outParams[0].is_unsigned = 1;
 
 	st->postExecFunc = &saveOutput;
 }
@@ -138,6 +260,9 @@ void initAddSpecieToSellOrder(MYSQL *conn, addSpecieToSellOrderStruct *st){
 	st->inParams[1] = getBindParam(MYSQL_TYPE_STRING, st->colore, 0);
 	st->inParams[2] = getBindParam(MYSQL_TYPE_LONG, &st->quantita, sizeof(st->quantita));
 	st->inParams[3] = getBindParam(MYSQL_TYPE_LONG, &st->sellOrderId, sizeof(st->sellOrderId));
+
+	st->inParams[2].is_unsigned = 1;
+	st->inParams[3].is_unsigned = 1;
 }
 
 
@@ -149,6 +274,9 @@ void initGetCostoOrdine(MYSQL *conn, getCostoOrdineStruct *st){
 	st->inParams[0] = getBindParam(MYSQL_TYPE_LONG, &st->sellOrderId, sizeof(st->sellOrderId));
 	st->outParams[0] = getBindParam(MYSQL_TYPE_LONG, &st->outCost, sizeof(st->outCost));
 
+	st->inParams[0].is_unsigned = 1;
+	st->outParams[0].is_unsigned = 1;
+
 	st->postExecFunc = &saveOutput;
 }
 
@@ -158,6 +286,8 @@ void initConfirmPayment(MYSQL *conn, confirmPaymentStruct *st){
 	st->stmt = initStmt(conn, "CALL confirmPayment( ? )");
 
 	st->inParams[0] = getBindParam(MYSQL_TYPE_LONG, &st->sellOrderId, sizeof(st->sellOrderId));
+
+	st->inParams[0].is_unsigned = 1;
 }
 
 
@@ -193,7 +323,7 @@ void initDropUser(MYSQL *conn, dropUserStruct *st){
 
 void initGetSpecie(MYSQL *conn, getSpecieStruct *st){
 
-	st->stmt = initStmt(conn, "SELECT nomeLatino FROM Specie");
+	st->stmt = initStmt(conn, "SELECT nomeLatino AS a, colore, nomeComune, giacenza, prezzo, esotica, giardAppart, CASE WHEN colore = '' THEN 'verde' ELSE 'fiorita' END AS verdeFiorita FROM Specie");
 
 	st->outParams[0] = getBindParam(MYSQL_TYPE_STRING, st->nomeLatino, MAX_NOME_LATINO_LEN);
 	st->outParams[1] = getBindParam(MYSQL_TYPE_STRING, st->colore, MAX_COLORE_LEN);
@@ -204,9 +334,9 @@ void initGetSpecie(MYSQL *conn, getSpecieStruct *st){
 	st->outParams[6] = getBindParam(MYSQL_TYPE_STRING, st->giardAppart, MAX_GIARD_APPART_LEN);
 	st->outParams[7] = getBindParam(MYSQL_TYPE_STRING, st->verdeFiorita, MAX_VERDE_FIORITA_LEN);
 
+	st->outParams[4].is_unsigned = 1;
 	
-	//testing. TODO: printResultSet() function
-	st->postExecFunc = &saveOutput;
+	st->postExecFunc = &printResultSet;
 }
 
 

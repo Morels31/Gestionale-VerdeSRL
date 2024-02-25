@@ -11,6 +11,10 @@ MYSQL_STMT *initStmt(MYSQL *conn, char *statement){
 
 	if(mysql_stmt_prepare(stmt, statement, strlen(statement))) stmtError(stmt, "mysql_stmt_prepare() failed");
 
+
+	unsigned updateLength = 1;
+	mysql_stmt_attr_set(stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &updateLength);
+
 	return stmt;
 }
 

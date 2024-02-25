@@ -56,13 +56,13 @@ void shellManager(MYSQL *conn){
 	initSetPrezzo(conn, &setPrezzo);
 	initChangePassword(conn, &changePassword);
 
-	printf("\nSuccessfully logged in as a manager.\n\n");
+	printf("\nSuccessfully logged in as a manager.\n");
 
 
 	unsigned loop = 1;
 	unsigned selection = 0;
 	while(loop){
-		selection = multipleChoice("Select beetween those actions: ", "Get Specie", "Add Specie", "Set Prezzo Specie", "Change Password", "Quit", NULL);
+		selection = multipleChoice("\nSelect beetween those actions: ", "Get Specie", "Add Specie", "Set Prezzo Specie", "Change Password", "Quit", NULL);
 
 		switch(selection) {
 			case 0:
@@ -70,8 +70,6 @@ void shellManager(MYSQL *conn){
 				break;
 			case 1:
 				EXEC_STMT(getSpecie);
-				printf(" - - - '%s' - - -\n", getSpecie.nomeLatino);
-				printf("Not yet implemented :<\n");
 				break;
 			case 2:
 				askAddSpecie();
@@ -81,6 +79,7 @@ void shellManager(MYSQL *conn){
 				break;
 			case 4:
 				askChangePassword();
+				memset(changePassword.newPsw, 0, MAX_PASSWORD_LEN);
 				break;
 			case 5:
 				loop = 0;

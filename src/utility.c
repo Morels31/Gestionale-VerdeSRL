@@ -124,7 +124,7 @@ unsigned multipleChoice(char *askStr, ...){
 		va_end(argptr);
 		fflush(stdout);
 
-		if(!readLine("Enter a number: ", invalidStr, 9, inputStr, NULL)) return 0;
+		if(!readLine("\nEnter a number: ", invalidStr, 9, inputStr, NULL)) return 0;
 
 		errno = 0;
 		inputNum = strtoul(inputStr, NULL, 10);
