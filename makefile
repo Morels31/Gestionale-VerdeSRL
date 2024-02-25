@@ -1,23 +1,14 @@
 
-COMMON_PATH := src
-
-SRC_FILES := main.c utility.c db_utility.c statements.c shells/magazzino.c shells/manager.c
-HEADER_FILES := $(SRC_FILES:.c=.h) common.h
-OBJ_FILES := $(SRC_FILES:.c=.o)
-
-SRCS := $(addprefix $(COMMON_PATH)/,$(SRC_FILES))
-HEADERS := $(addprefix $(COMMON_PATH)/,$(HEADER_FILES))
-OBJS := $(addprefix $(COMMON_PATH)/,$(OBJ_FILES))
-
+SRCS := $(shell find ./src -name '*.c')
+HEADERS := $(shell find ./src -name '*.h')
+OBJS := $(SRCS:.c=.o)
 
 
 LINKER_OPT := -lcrypt -pie $$(mariadb_config --include --libs)
 COMPILER_OPT :=
 
 
-
 TARGETS := client
-
 
 
 all: $(TARGETS) light-clean
