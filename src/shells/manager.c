@@ -1,13 +1,11 @@
-#include "../common.h"
-#include "manager.h"
-#include "../statements.h"
-#include "../utility.h"
+#include "shells.h"
+
 
 
 static getSpecieStruct getSpecie = {0};
 static addSpecieStruct addSpecie = {0};
 static setPrezzoStruct setPrezzo = {0};
-static changePasswordStruct changePassword= {0};
+static changePasswordStruct changePassword = {0};
 
 
 

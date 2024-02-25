@@ -1,7 +1,7 @@
 #include "common.h"
-#include "statements.h"
-#include "utility.h"
 #include "db_utility.h"
+#include "utility.h"
+#include "statements.h"
 
 
 

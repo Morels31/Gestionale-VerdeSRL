@@ -1,4 +1,5 @@
 #include "common.h"
+#include "db_utility.h"
 #include "utility.h"
 
 
@@ -252,6 +253,68 @@ unsigned multipleChoice(char *askStr, ...){
 	fflush(stdout);
 
 	return readInt("Enter a number: ", 1, index-1);
+}
+
+
+
+/*
+ *  Reads from a file named 'filename',
+ *  and writes the result to the char buffer pointed by 'buffer'.
+ *  Assumes size of 'buffer' to be at least 'maxLen' + 1
+ *  If the content of the file is longer than 'maxLen' chars, the rest will be ignored.
+ *
+ *    'buffer' = pointer to the already allocated char buffer
+ *    'maxLen' = maximum number of character to read
+ *    'filename' = path of the file to read
+ *
+ *    returns 0 if no error occoured, or,
+ *    returns 1 if file does not exist
+ */
+
+int readFromFile(char *buffer, int maxLen, char *filename){
+	if(!filename || !buffer) error("NULL argument");
+	buffer[0] = '\0';
+	
+	int fd;
+	if((fd = open(filename, O_RDONLY, 0600))==-1){
+		if(errno!=ENOENT) error("open() failed");
+		return 1;
+	}
+
+	ssize_t readed; 
+	if((readed = read(fd, buffer, maxLen))<0) error("read() failed");
+	buffer[readed && buffer[readed-1]=='\n' ? readed-1 : readed] = '\0';  //removes eventual '\n' last char
+
+	close(fd);
+	return 0;
+}
+
+
+
+/*
+ *  Writes to a file named 'filename' the string pointed by 'str'.
+ *  If the file already exist, will be overwritten, or else will be created.
+ *  If the string is empty, it does nothing.
+ *
+ *    'str' = pointer to the string
+ *    'filename' = path of the file to create
+ */
+
+void writeToFile(char *str, char *filename){
+	if(!filename || !str) error("NULL argument");
+	if(!str[0]) return;
+
+	int fd;
+	if((fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY, 0600))==-1) error("open() failed");
+
+	ssize_t writed, toWrite;
+	toWrite = strlen(str);
+	while(toWrite > 0){
+		if((writed = write(fd, str, toWrite))<0) error("write() failed");
+		toWrite -= writed;
+		str += writed;
+	}
+	close(fd);
 }
 
 

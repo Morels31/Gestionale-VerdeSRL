@@ -5,9 +5,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <mysql.h>
-#include <ma_global.h>
-#include <ma_sys.h>
 #include <errno.h>
 
 
@@ -28,7 +25,6 @@
 	fflush(stderr); \
 	exit(2); \
 }
-
 
 #define mysqlErr(conn){ \
 	if(!conn) error("Unknown MYSQL error"); \
@@ -60,8 +56,6 @@
 	if(stmt) fprintf (stderr, "Error %u (%s): %s\n", mysql_stmt_errno(stmt), mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt)); \
 	exit(5); \
 }
-
-
 
 
 
@@ -97,21 +91,10 @@
 #define MAX_GIARD_APPART_LEN 30
 #define MAX_VERDE_FIORITA_LEN 15
 
-
-
 /* Has to be bigger than the biggest MAX_*_LEN value +1 */
 #define BUFF_LEN 1024
+
+
 #define ADMIN_ROLE "administrator"
 #define MANAGER_ROLE "manager"
 #define WAREHOUSE_ROLE "warehouse"
-
-
-
-typedef struct dbInformation{
-	unsigned port;
-	char hostname[MAX_HOSTNAME_LEN+1];
-	char dbName[MAX_DB_NAME_LEN+1];
-	char username[MAX_USERNAME_LEN+1];
-	char password[MAX_PASSWORD_LEN+1];
-} dbI;
-

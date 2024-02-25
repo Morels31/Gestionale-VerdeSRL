@@ -4,6 +4,12 @@
 
 
 
+/*
+ *  Initializes a statement.
+ *
+ *    returns the initialized statement
+ */
+
 MYSQL_STMT *initStmt(MYSQL *conn, char *statement){
 
 	MYSQL_STMT *stmt = mysql_stmt_init(conn);
@@ -20,6 +26,15 @@ MYSQL_STMT *initStmt(MYSQL *conn, char *statement){
 
 
 
+/*
+ *  This function initializes a MYSQL_BIND struct to 0,
+ *  and then fills with the paramaters given in input.
+ *
+ *    'type' = type of the binded variable.
+ *    'buffer' = pointer to where the variable is/will be stored.
+ *    'len' = length of the buffer.
+ */
+
 MYSQL_BIND getBindParam(enum enum_field_types type, void *buffer, unsigned long len){
 
 	MYSQL_BIND param;
@@ -35,63 +50,69 @@ MYSQL_BIND getBindParam(enum enum_field_types type, void *buffer, unsigned long 
 
 
 /*
- *  Reads from a file named 'filename',
- *  and writes the result to the char buffer pointed by 'buffer'.
- *  Assumes size of 'buffer' to be at least 'maxLen' + 1
- *  If the content of the file is longer than 'maxLen' chars, the rest will be ignored.
+ *  Queries the database to get the role of the current user.
+ *  Saving the result in a char buffer pointed by 'dest'.
+ *  (That has to be at least MAX_ROLE_LEN+1)
  *
- *    'buffer' = pointer to the already allocated char buffer
- *    'maxLen' = maximum number of character to read
- *    'filename' = path of the file to read
+ *  If the current role is NULL, the first char of 'dest' will be set to '\0'.
  *
- *    returns 0 if no error occoured, or,
- *    returns 1 if file does not exist
+ *    'conn' = a db connection handle
+ *    'dest' = already allocated char buffer where result will be written
+ *
  */
 
-int readFromFile(char *buffer, int maxLen, char *filename){
-	if(!filename || !buffer) error("NULL argument");
-	buffer[0] = '\0';
+void getCurrentRole(MYSQL *conn, char *dest){
+
+	if(mysql_query(conn, "SELECT CURRENT_ROLE")) mysqlError(conn, "mysql_query() failed");
 	
-	int fd;
-	if((fd = open(filename, O_RDONLY, 0600))==-1){
-		if(errno!=ENOENT) error("open() failed");
-		return 1;
+	MYSQL_RES *result;
+	result = mysql_use_result(conn);
+	if(!result) mysqlError(conn, "mysql_use_result() failed");
+	
+	unsigned nFields;
+	nFields = mysql_field_count(conn);
+	if(nFields!=1) err("getCurrentRole() failed");
+
+	MYSQL_ROW row = mysql_fetch_row(result);
+	if(!row) mysqlError(conn, "getCurrentRole() failed");
+
+	if(!row[0]) dest[0] = '\0';
+	else{
+		if(strlen(row[0])>MAX_ROLE_LEN) err("There is a role longer than MAX_ROLE_LEN");
+		strcpy(dest, row[0]);
 	}
-
-	ssize_t readed; 
-	if((readed = read(fd, buffer, maxLen))<0) error("read() failed");
-	buffer[readed && buffer[readed-1]=='\n' ? readed-1 : readed] = '\0';  //removes eventual '\n' last char
-
-	close(fd);
-	return 0;
+	mysql_free_result(result);
 }
 
 
 
 /*
- *  Writes to a file named 'filename' the string pointed by 'str'.
- *  If the file already exist, will be overwritten, or else will be created.
- *  If the string is empty, it does nothing.
+ *  Asks the user for username and password,
+ *  and then tries to login to the database
+ *  with the info provided by the input parameter struct.
  *
- *    'str' = pointer to the string
- *    'filename' = path of the file to create
+ *    'dbInfo' = pointer to a struct where the needed connection info are stored.
+ *
+ *    returns a valid MYSQL connection handler.
  */
 
-void writeToFile(char *str, char *filename){
-	if(!filename || !str) error("NULL argument");
-	if(!str[0]) return;
+MYSQL *dbLogin(dbI *dbInfo){
+	MYSQL *conn = mysql_init(NULL);
+	if(!conn) err("mysql_init() failed");
 
-	int fd;
-	if((fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY, 0600))==-1) error("open() failed");
+	while(1){
 
-	ssize_t writed, toWrite;
-	toWrite = strlen(str);
-	while(toWrite > 0){
-		if((writed = write(fd, str, toWrite))<0) error("write() failed");
-		toWrite -= writed;
-		str += writed;
+		readUsername("Enter Username: ", dbInfo->username);
+		readPassword("Enter Password: ", dbInfo->password);
+
+		if(mysql_real_connect(conn, dbInfo->hostname, dbInfo->username, dbInfo->password, dbInfo->dbName, dbInfo->port, NULL, 0)) break;
+
+		if(mysql_errno(conn)!=1045) mysqlErr(conn);
+		sleep(3);
+		printf("\nWrong credentials. Retry\n\n");
+	
 	}
-	close(fd);
+	return conn;
 }
 
 

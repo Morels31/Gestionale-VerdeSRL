@@ -187,8 +187,6 @@ typedef struct getSpecieStatementStruct {
 
 
 
-
-
 int execStmt(MYSQL_STMT *stmt, MYSQL_BIND *inParams, MYSQL_BIND *outParams, int (*postExecFunc)(MYSQL_STMT *, MYSQL_BIND *));
 int saveOutput(MYSQL_STMT *stmt, MYSQL_BIND *ignored);
 void printBindedVar(MYSQL_BIND *bind, int padding);
