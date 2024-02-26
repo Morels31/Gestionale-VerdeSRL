@@ -137,7 +137,7 @@ int printResultSet(MYSQL_STMT *stmt, MYSQL_BIND *outParams){
 
 			field = mysql_fetch_field_direct(meta, i);
 
-			if(outParams[i].is_null_value)
+			if(outParams[i].is_null && *outParams[i].is_null)
 				printf(" %-*s |", (int)field->max_length, "NULL");
 			else
 				printBindedVar(&outParams[i], (int)field->max_length);
@@ -323,7 +323,7 @@ void initDropUser(MYSQL *conn, dropUserStruct *st){
 
 void initGetSpecie(MYSQL *conn, getSpecieStruct *st){
 
-	st->stmt = initStmt(conn, "SELECT nomeLatino AS a, colore, nomeComune, giacenza, prezzo, esotica, giardAppart, CASE WHEN colore = '' THEN 'verde' ELSE 'fiorita' END AS verdeFiorita FROM Specie");
+	st->stmt = initStmt(conn, "SELECT nomeLatino, colore, nomeComune, giacenza, prezzo, esotica, giardAppart, CASE WHEN colore = '' THEN 'verde' ELSE 'fiorita' END AS verdeFiorita FROM Specie");
 
 	st->outParams[0] = getBindParam(MYSQL_TYPE_STRING, st->nomeLatino, MAX_NOME_LATINO_LEN);
 	st->outParams[1] = getBindParam(MYSQL_TYPE_STRING, st->colore, MAX_COLORE_LEN);
@@ -335,7 +335,7 @@ void initGetSpecie(MYSQL *conn, getSpecieStruct *st){
 	st->outParams[7] = getBindParam(MYSQL_TYPE_STRING, st->verdeFiorita, MAX_VERDE_FIORITA_LEN);
 
 	st->outParams[4].is_unsigned = 1;
-	
+
 	st->postExecFunc = &printResultSet;
 }
 
