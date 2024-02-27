@@ -195,20 +195,24 @@ long long readInt(char *askStr, long long min, long long max){
  *  (case insensitive)
  *
  *    'askStr' = string that will be printed before user input.
+ *    'defaultChoice' = the value that will be returned for an empty input (0 for no default)
  *    'choice1' = first option
- *    'choice1' = second option
+ *    'choice2' = second option
  *
- *    returns 1 if choice1 is selected,
- *    returns 0 if choice2 is selected, or,
- *    returns -1 for an empty input
+ *    returns 1 if choice1 is selected, or,
+ *    returns 2 if choice2 is selected.
  */
 
-int choice(char *askStr, char *choice1, char *choice2){
+unsigned choice(char *askStr, unsigned defaultChoice, char *choice1, char *choice2){
 	char buff[BUFF_LEN];
 	while(1){
-		if(!readLine(askStr, "String too long.\n\n", BUFF_LEN-1, buff, NULL)) return -1;
+		if(!readLine(askStr, "String too long.\n\n", BUFF_LEN-1, buff, NULL)){
+			if(defaultChoice==1 || defaultChoice==2) return defaultChoice;
+			printf("\nThere is no default choice, retry...\n\n";
+			continue;
+		}
 		if(!strcasecmp(buff, choice1)) return 1;
-		if(!strcasecmp(buff, choice2)) return 0;
+		if(!strcasecmp(buff, choice2)) return 2;
 		printf("\nInvalid input, retry...\n\n");
 	}
 }
