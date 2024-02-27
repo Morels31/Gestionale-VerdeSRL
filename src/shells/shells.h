@@ -9,5 +9,7 @@
 
 
 
+void shellAmministratore(MYSQL *conn);
 void shellManager(MYSQL *conn);
 void shellMagazzino(MYSQL *conn);
+void shellSegreteria(MYSQL *conn);

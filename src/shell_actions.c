@@ -160,3 +160,13 @@ void changePassword(changePasswordStruct *st){
 }
 
 
+
+void addNewUser(addNewUserStruct *st){
+	printf("Not yet implemented\n");
+}
+
+
+
+void dropUser(dropUserStruct *st){
+	printf("Not yet implemented\n");
+}

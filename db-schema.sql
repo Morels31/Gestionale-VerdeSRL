@@ -576,6 +576,18 @@ CREATE OR REPLACE USER admin IDENTIFIED BY 'CHANGEME';
 GRANT amministratore TO admin;
 SET DEFAULT ROLE amministratore FOR admin;
 
-CREATE OR REPLACE USER test IDENTIFIED BY 'password';
-GRANT manager TO test;
-SET DEFAULT ROLE manager FOR test;
+
+
+
+
+CREATE OR REPLACE USER testManager IDENTIFIED BY 'password';
+GRANT manager TO testManager;
+SET DEFAULT ROLE manager FOR testManager;
+
+CREATE OR REPLACE USER testMagazzino IDENTIFIED BY 'password';
+GRANT manager TO testMagazzino;
+SET DEFAULT ROLE manager FOR testMagazzino;
+
+CREATE OR REPLACE USER testSegreteria IDENTIFIED BY 'password';
+GRANT manager TO testSegreteria;
+SET DEFAULT ROLE manager FOR testSegreteria;

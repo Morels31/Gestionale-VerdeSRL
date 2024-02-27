@@ -38,12 +38,12 @@ int main(int argc, char **argv){
 
 	memset(&dbInfo, 0, sizeof(dbI));
 
-	//if(!strcmp(role, "amministratore")) shellAmministrtore(conn);
-	if(!strcmp(role, "manager")) shellManager(conn);
-	if(!strcmp(role, "magazzino")) shellMagazzino(conn);
-	//if(!strcmp(role, "segreteria")) shellSegreteria(conn);
+	if(!strcmp(role, "amministratore")) shellAmministratore(conn);
+	else if(!strcmp(role, "manager")) shellManager(conn);
+	else if(!strcmp(role, "magazzino")) shellMagazzino(conn);
+	else if(!strcmp(role, "segreteria")) shellSegreteria(conn);
+	else printf("You logged in with an user without role.\n");
 
-	//Controllare se il ruolo non è null
 
 	mysql_close(conn);
 

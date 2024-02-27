@@ -2,10 +2,6 @@
 
 
 
-
-
-
-
 void shellManager(MYSQL *conn){
 	
 	getSpecieStruct getSpecieS = {0};
@@ -18,13 +14,13 @@ void shellManager(MYSQL *conn){
 	initSetPrezzo(conn, &setPrezzoS);
 	initChangePassword(conn, &changePasswordS);
 
-	printf("\nSuccessfully logged in as a manager.\n");
+	printf("\nSuccessfully logged in with role 'manager'.\n");
 
 
 	unsigned loop = 1;
 	unsigned selection;
 	while(loop){
-		selection = multipleChoice("\nSelect beetween those actions: ", "Get Specie", "Add Specie", "Set Prezzo Specie", "Change Password", "Quit", NULL);
+		selection = multipleChoice("\nSelect beetween those actions: ", "Get specie", "Add specie", "Set prezzo specie", "Change password", "Quit", NULL);
 
 		switch(selection) {
 			case 1:
