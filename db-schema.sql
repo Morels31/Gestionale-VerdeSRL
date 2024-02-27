@@ -470,8 +470,8 @@ CREATE OR REPLACE PROCEDURE getCostoOrdine(IN sellId INT UNSIGNED, OUT cost INT 
         START TRANSACTION;
 
             SELECT costoOrdine INTO cost
-            FROM OrdineVendita
-            WHERE idVendita = sellId;
+                FROM OrdineVendita
+                WHERE idVendita = sellId;
 
         COMMIT;
     END;

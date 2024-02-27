@@ -50,6 +50,9 @@ void initGetFornitoriForSpecie(MYSQL *conn, getFornitoriForSpecieStruct *st){
 	st->inParams[1] = getBindParam(MYSQL_TYPE_STRING, st->colore, 0);
 	st->outParams[0] = getBindParam(MYSQL_TYPE_LONG, &st->outIdFornitore, sizeof(st->outIdFornitore));
 	st->outParams[1] = getBindParam(MYSQL_TYPE_VAR_STRING, st->outNomeFornitore, MAX_NOME_FORNITORE_LEN);
+	st->outParams[0].is_unsigned = 1;
+
+	st->postExecFunc = &printResultSet;
 }
 
 

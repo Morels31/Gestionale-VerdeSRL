@@ -208,7 +208,7 @@ unsigned choice(char *askStr, unsigned defaultChoice, char *choice1, char *choic
 	while(1){
 		if(!readLine(askStr, "String too long.\n\n", BUFF_LEN-1, buff, NULL)){
 			if(defaultChoice==1 || defaultChoice==2) return defaultChoice;
-			printf("\nThere is no default choice, retry...\n\n";
+			printf("\nThere is no default choice, retry...\n\n");
 			continue;
 		}
 		if(!strcasecmp(buff, choice1)) return 1;

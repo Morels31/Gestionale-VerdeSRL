@@ -13,13 +13,6 @@ void shellMagazzino(MYSQL *conn){
 	initNewBuyOrder(conn, &newBuyOrderS);
 
 
-	readPKSpecie(editGiacenzaS.nomeLatino, editGiacenzaS.colore, \
-		&editGiacenzaS.inParams[0].buffer_length, &editGiacenzaS.inParams[1].buffer_length);
-
-	editGiacenzaS.diffGiacenza = readInt("Insert how much to modify the stock (with minus or plus signs): ", MIN_MYSQL_INT, MAX_MYSQL_INT);
-
-	EXEC_STMT(&editGiacenzaS);
-
 
 
 	printf("Si\n");
