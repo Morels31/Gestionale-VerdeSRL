@@ -5,10 +5,6 @@
 
 
 
-
-
-
-
 int main(int argc, char **argv){
 	dbI dbInfo = {0};
 

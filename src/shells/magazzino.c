@@ -2,32 +2,33 @@
 
 
 
-static editGiacenzaStruct editGiacenza = {0};
-static newBuyOrderStruct newBuyOrder = {0};
 
 
 
 void shellMagazzino(MYSQL *conn){
-	initEditGiacenza(conn, &editGiacenza);
-	initNewBuyOrder(conn, &newBuyOrder);
+	editGiacenzaStruct editGiacenzaS = {0};
+	newBuyOrderStruct newBuyOrderS = {0};
+
+	initEditGiacenza(conn, &editGiacenzaS);
+	initNewBuyOrder(conn, &newBuyOrderS);
 
 
-	readPKSpecie(editGiacenza.nomeLatino, editGiacenza.colore, \
-		&editGiacenza.inParams[0].buffer_length, &editGiacenza.inParams[1].buffer_length);
+	readPKSpecie(editGiacenzaS.nomeLatino, editGiacenzaS.colore, \
+		&editGiacenzaS.inParams[0].buffer_length, &editGiacenzaS.inParams[1].buffer_length);
 
-	editGiacenza.diffGiacenza = readInt("Insert how much to modify the stock (with minus or plus signs): ", MIN_MYSQL_INT, MAX_MYSQL_INT);
+	editGiacenzaS.diffGiacenza = readInt("Insert how much to modify the stock (with minus or plus signs): ", MIN_MYSQL_INT, MAX_MYSQL_INT);
 
-	EXEC_STMT(editGiacenza);
+	EXEC_STMT(&editGiacenzaS);
 
 
 
 	printf("Si\n");
-	newBuyOrder.idFornitore = 1;
+	newBuyOrderS.idFornitore = 1;
 
 	//execGenericStmt((void *)&newBuyOrder, &newBuyOrder.outParams[0]);
-	EXEC_STMT(newBuyOrder);
+	EXEC_STMT(&newBuyOrderS);
 
-	mysql_stmt_fetch(newBuyOrder.stmt);
-	printf("%lu\n", newBuyOrder.outBuyOrderId);
+	mysql_stmt_fetch(newBuyOrderS.stmt);
+	printf("%lu\n", newBuyOrderS.outBuyOrderId);
 
 }

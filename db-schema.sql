@@ -511,6 +511,24 @@ DELIMITER ;
 
 
 
+----------------------
+-- Changes password --
+----------------------
+
+DELIMITER $$$
+
+CREATE OR REPLACE PROCEDURE changePassword(IN newPsw CHAR(100))
+    BEGIN
+        DECLARE @username CHAR(128);
+        SELECT SUBSTRING_INDEX(CURRENT_USER(), '@', 1) INTO @username;
+        ALTER USER @username IDENTIFIED BY 'nuovapsw';
+    END;
+$$$
+
+DELIMITER ;
+
+
+
 
 
 CREATE OR REPLACE ROLE amministratore;
@@ -531,6 +549,7 @@ CREATE OR REPLACE ROLE manager WITH ADMIN amministratore;
 GRANT SELECT ON prod.Specie TO manager;
 GRANT EXECUTE ON PROCEDURE prod.addSpecie TO manager;
 GRANT EXECUTE ON PROCEDURE prod.setPrezzo TO manager;
+GRANT EXECUTE ON PROCEDURE prod.changePassword TO manager;
 
 
 CREATE OR REPLACE ROLE magazzino WITH ADMIN amministratore;

@@ -3,7 +3,7 @@
 #include <mysql.h>
 
 
-#define EXEC_STMT(stmtS) execStmt(stmtS.stmt, stmtS.inParams, stmtS.outParams, stmtS.postExecFunc)
+#define EXEC_STMT(stmtS) execStmt((stmtS)->stmt, (stmtS)->inParams, (stmtS)->outParams, (stmtS)->postExecFunc)
 
 
 /*
@@ -187,12 +187,6 @@ typedef struct getSpecieStatementStruct {
 
 
 
-int execStmt(MYSQL_STMT *stmt, MYSQL_BIND *inParams, MYSQL_BIND *outParams, int (*postExecFunc)(MYSQL_STMT *, MYSQL_BIND *));
-int saveOutput(MYSQL_STMT *stmt, MYSQL_BIND *ignored);
-void printBindedVar(MYSQL_BIND *bind, int padding);
-void printDashes(MYSQL_RES *meta);
-void printResultSetHeader(MYSQL_RES *meta);
-int printResultSet(MYSQL_STMT *stmt, MYSQL_BIND *outParams);
 void initAddSpecie(MYSQL *conn, addSpecieStruct *st);
 void initSetPrezzo(MYSQL *conn, setPrezzoStruct *st);
 void initEditGiacenza(MYSQL *conn, editGiacenzaStruct *st);
