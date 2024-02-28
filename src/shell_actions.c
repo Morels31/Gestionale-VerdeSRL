@@ -28,7 +28,7 @@ void addSpecie(addSpecieStruct *st){
 
 
 	if(!EXEC_STMT(st))
-		printf("\nNew Specie added correctly\n");
+		printf("\n\n%sNew Specie added correctly.%s\n", GREEN_COLOR, RESET_COLOR);
 }
 
 
@@ -40,7 +40,7 @@ void setPrezzo(setPrezzoStruct *st){
 	st->newPrezzo = readInt("Enter new price: ", 0, MAX_MYSQL_UINT);
 
 	if(!EXEC_STMT(st))
-		printf("\nNew Price set correctly\n");
+		printf("\n\n%sNew Price set correctly.%s\n", GREEN_COLOR, RESET_COLOR);
 }
 
 
@@ -52,7 +52,7 @@ void editGiacenza(editGiacenzaStruct *st){
 	st->diffGiacenza = readInt("Enter how much to modify the stock (with minus or plus signs): ", MIN_MYSQL_INT, MAX_MYSQL_INT);
 
 	if(!EXEC_STMT(st))
-		printf("\nGiacenza edited correctly\n");
+		printf("\n\n%sGiacenza edited correctly.%s\n", GREEN_COLOR, RESET_COLOR);
 }
 
 
@@ -71,7 +71,7 @@ void newBuyOrder(newBuyOrderStruct *st){
 	st->idFornitore = readInt("Enter an idFornitore: ", 1, MAX_MYSQL_UINT);
 
 	if(!EXEC_STMT(st))
-		printf("\nNew buy order created successfully.\nWith ID: %lu\n", st->outBuyOrderId);
+		printf("\n\n%sNew buy order created successfully, with ID: %lu.%s\n", GREEN_COLOR, st->outBuyOrderId, RESET_COLOR);
 }
 
 
@@ -89,7 +89,7 @@ void addSpecieToBuyOrder(addSpecieToBuyOrderStruct *st, unsigned long lastBuyOrd
 		st->buyOrderId = readInt("Enter a valid buy order ID: ", 1, MAX_MYSQL_UINT);
 
 	if(!EXEC_STMT(st))
-		printf("\nSuccessfully added specie to buy order.\n");
+		printf("\n\n%sSuccessfully added specie to buy order with ID: %lu.%s\n", GREEN_COLOR, st->buyOrderId, RESET_COLOR);
 }
 
 
@@ -101,7 +101,7 @@ void newSellOrder(newSellOrderStruct *st){
 	readLine("Enter a shipping contact: ", "String too long\n", MAX_CONTATTO_LEN, st->contatto, &st->inParams[1].buffer_length);
 
 	if(!EXEC_STMT(st))
-		printf("\nNew sell order created successfully.\nWith ID: %lu\n", st->outSellOrderId);
+		printf("\n\n%sNew sell order created successfully, with ID: %lu.%s\n", GREEN_COLOR, st->outSellOrderId, RESET_COLOR);
 }
 
 
@@ -119,7 +119,7 @@ void addSpecieToSellOrder(addSpecieToSellOrderStruct *st, unsigned long lastSell
 		st->sellOrderId = readInt("Enter a valid sell order ID: ", 1, MAX_MYSQL_UINT);
 
 	if(!EXEC_STMT(st))
-		printf("\nSuccessfully added specie to sell order.\n");
+		printf("\n\n%sSuccessfully added specie to sell order with ID: %lu.%s\n", GREEN_COLOR, st->sellOrderId, RESET_COLOR);
 }
 
 
@@ -133,7 +133,7 @@ void getCostoOrdine(getCostoOrdineStruct *st, unsigned long lastSellOrderId){
 		st->sellOrderId = readInt("Enter a valid sell order ID: ", 1, MAX_MYSQL_UINT);
 
 	if(!EXEC_STMT(st))
-		printf("\nPrice of the sell order: %lu\n", st->outCost);
+		printf("\n\n%sPrice of the sell order: %lu cents.%s\n", GREEN_COLOR, st->outCost, RESET_COLOR);
 }
 
 
@@ -147,7 +147,7 @@ void confirmPayment(confirmPaymentStruct *st, unsigned long lastSellOrderId){
 		st->sellOrderId = readInt("Enter a valid sell order ID: ", 1, MAX_MYSQL_UINT);
 
 	if(!EXEC_STMT(st))
-		printf("\nSuccessfully confirmed payment of sell order.\n");
+		printf("\n\n%sSuccessfully confirmed payment of sell order with id %lu.%s\n", GREEN_COLOR, st->sellOrderId, RESET_COLOR);
 }
 
 
@@ -157,7 +157,7 @@ void changePassword(changePasswordStruct *st){
 	st->inParams[0].buffer_length = strlen(st->newPsw);
 
 	if(!EXEC_STMT(st))
-		printf("\nPassword changed successfully\n");
+		printf("\n\n%sPassword changed successfully.%s\n", GREEN_COLOR, RESET_COLOR);
 
 	memset(st->newPsw, 0, MAX_PASSWORD_LEN);
 }
@@ -192,7 +192,7 @@ void addNewUser(addNewUserStruct *st){
 	}
 
 	if(!EXEC_STMT(st))
-		printf("\nNew user created successfully\n");
+		printf("\n\n%sNew user '%s' created successfully%s\n", GREEN_COLOR, st->username, RESET_COLOR);
 
 	memset(st->password, 0, MAX_PASSWORD_LEN);
 }
@@ -204,5 +204,5 @@ void dropUser(dropUserStruct *st){
 	st->inParams[0].buffer_length = strlen(st->username);
 
 	if(!EXEC_STMT(st))
-		printf("\nUser deleted successfully\n");
+		printf("\n\n%sUser '%s' deleted successfully.%s\n", GREEN_COLOR, st->username, RESET_COLOR);
 }

@@ -8,6 +8,11 @@
 #include <errno.h>
 
 
+#define RED_COLOR "\033[0;31m" 
+#define GREEN_COLOR "\033[0;32m" 
+#define YELLOW_COLOR "\033[0;33m" 
+#define RESET_COLOR "\033[0m"
+
 
 #define printNow(s) { \
 	printf("%s", s); \
@@ -15,45 +20,45 @@
 }
 
 #define err(str) { \
-	fprintf(stderr, "ERROR: %s.\a\n", str); \
+	fprintf(stderr, "\n\n%sERROR: %s.%s\a\n", RED_COLOR, str, RESET_COLOR); \
 	fflush(stderr); \
 	exit(1); \
 }
 
 #define error(str) { \
-	fprintf(stderr, "ERROR: %s. (func: %s() line: %d)\nERRNO (%d): %s\a\n", str, __func__, __LINE__, errno, strerror(errno)); \
+	fprintf(stderr, "\n\n%sERROR: %s. (func: %s() line: %d)\nERRNO (%d): %s%s\a\n", RED_COLOR, str, __func__, __LINE__, errno, strerror(errno), RESET_COLOR); \
 	fflush(stderr); \
 	exit(2); \
 }
 
 #define mysqlErr(conn){ \
 	if(!conn) error("Unknown MYSQL error"); \
-	fprintf(stderr, "ERROR: %s.\a\n", mysql_error(conn)); \
+	fprintf(stderr, "\n\n%sERROR: %s.%s\a\n", RED_COLOR, mysql_error(conn), RESET_COLOR); \
 	exit(3); \
 }
 
 
 #define mysqlError(conn, str){ \
-	fprintf (stderr, "MYSQL_ERROR: %s.\n", str); \
-    if(conn) fprintf (stderr, "Error %u (%s): %s\a\n", mysql_errno(conn), mysql_sqlstate(conn), mysql_error(conn)); \
+	fprintf (stderr, "\n\n%sMYSQL_ERROR: %s.%s\n", RED_COLOR, str, RESET_COLOR); \
+    if(conn) fprintf (stderr, "%sError %u (%s): %s%s\a\n", RED_COLOR, mysql_errno(conn), mysql_sqlstate(conn), mysql_error(conn), RESET_COLOR); \
 	exit(4); \
 }
 
 #define stmtErr(stmt, str){ \
 	if(stmt){ \
 		if(mysql_stmt_sqlstate(stmt)[0]=='4' && mysql_stmt_sqlstate(stmt)[1]=='5'){ \
-			fprintf (stderr, "\nWarning (%s): %s\a\n", mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt)); \
+			fprintf (stderr, "\n\n%sWarning (%s): %s%s\a\n", YELLOW_COLOR, mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt), RESET_COLOR); \
 			return 1; \
 		} \
-		fprintf (stderr, "STMT_ERROR: %s.\a\n", str); \
-		fprintf (stderr, "Error %u (%s): %s\n", mysql_stmt_errno(stmt), mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt)); \
+		fprintf (stderr, "\n\n%sSTMT_ERROR: %s.\a\n", RED_COLOR, str); \
+		fprintf (stderr, "Error %u (%s): %s%s\n", mysql_stmt_errno(stmt), mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt), RESET_COLOR); \
 	} \
 	exit(5); \
 }
 
 #define stmtError(stmt, str){ \
-	fprintf (stderr, "STMT_ERROR: %s.\a\n", str); \
-	if(stmt) fprintf (stderr, "Error %u (%s): %s\n", mysql_stmt_errno(stmt), mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt)); \
+	fprintf (stderr, "\n\n%sSTMT_ERROR: %s.%s\a\n", RED_COLOR, str, RESET_COLOR); \
+	if(stmt) fprintf (stderr, "%sError %u (%s): %s%s\n", RED_COLOR, mysql_stmt_errno(stmt), mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt), RESET_COLOR); \
 	exit(5); \
 }
 
