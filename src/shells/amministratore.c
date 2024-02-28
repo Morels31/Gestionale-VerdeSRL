@@ -12,7 +12,7 @@ void shellAmministratore(MYSQL *conn){
 	initDropUser(conn, &dropUserS);
 	initChangePassword(conn, &changePasswordS);
 
-	printf("\nSuccessfully logged in with role 'amministratore'.\n");
+	printf("\n\n%sSuccessfully logged in with role 'amministratore'.%s\n", GREEN_COLOR, RESET_COLOR);
 
 
 	unsigned loop = 1;

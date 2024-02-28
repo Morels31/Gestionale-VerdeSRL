@@ -17,7 +17,7 @@ void shellMagazzino(MYSQL *conn){
 	initAddSpecieToBuyOrder(conn, &addSpecieToBuyOrderS);
 	initChangePassword(conn, &changePasswordS);
 
-	printf("\nSuccessfully logged in with role 'magazzino'.\n");
+	printf("\n\n%sSuccessfully logged in with role 'magazzino'.%s\n", GREEN_COLOR, RESET_COLOR);
 
 
 	unsigned loop = 1;

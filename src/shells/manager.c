@@ -14,7 +14,7 @@ void shellManager(MYSQL *conn){
 	initSetPrezzo(conn, &setPrezzoS);
 	initChangePassword(conn, &changePasswordS);
 
-	printf("\nSuccessfully logged in with role 'manager'.\n");
+	printf("\n\n%sSuccessfully logged in with role 'manager'.%s\n", GREEN_COLOR, RESET_COLOR);
 
 
 	unsigned loop = 1;

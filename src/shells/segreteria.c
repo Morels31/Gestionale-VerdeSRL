@@ -18,7 +18,7 @@ void shellSegreteria(MYSQL *conn){
 	initConfirmPayment(conn, &confirmPaymentS);
 	initChangePassword(conn, &changePasswordS);
 
-	printf("\nSuccessfully logged in with role 'segreteria'.\n");
+	printf("\n\n%sSuccessfully logged in with role 'segreteria'.%s\n", GREEN_COLOR, RESET_COLOR);
 
 
 	unsigned loop = 1;
