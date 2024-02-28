@@ -15,44 +15,44 @@
 }
 
 #define err(str) { \
-	fprintf(stderr, "ERROR: %s.\n", str); \
+	fprintf(stderr, "ERROR: %s.\a\n", str); \
 	fflush(stderr); \
 	exit(1); \
 }
 
 #define error(str) { \
-	fprintf(stderr, "ERROR: %s. (func: %s() line: %d)\nERRNO (%d): %s\n", str, __func__, __LINE__, errno, strerror(errno)); \
+	fprintf(stderr, "ERROR: %s. (func: %s() line: %d)\nERRNO (%d): %s\a\n", str, __func__, __LINE__, errno, strerror(errno)); \
 	fflush(stderr); \
 	exit(2); \
 }
 
 #define mysqlErr(conn){ \
 	if(!conn) error("Unknown MYSQL error"); \
-	fprintf(stderr, "ERROR: %s.\n", mysql_error(conn)); \
+	fprintf(stderr, "ERROR: %s.\a\n", mysql_error(conn)); \
 	exit(3); \
 }
 
 
 #define mysqlError(conn, str){ \
 	fprintf (stderr, "MYSQL_ERROR: %s.\n", str); \
-    if(conn) fprintf (stderr, "Error %u (%s): %s\n", mysql_errno(conn), mysql_sqlstate(conn), mysql_error(conn)); \
+    if(conn) fprintf (stderr, "Error %u (%s): %s\a\n", mysql_errno(conn), mysql_sqlstate(conn), mysql_error(conn)); \
 	exit(4); \
 }
 
 #define stmtErr(stmt, str){ \
-	fprintf (stderr, "STMT_ERROR: %s.\n", str); \
 	if(stmt){ \
 		if(mysql_stmt_sqlstate(stmt)[0]=='4' && mysql_stmt_sqlstate(stmt)[1]=='5'){ \
-			fprintf (stderr, "Warning (%s): %s\n\n", mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt)); \
+			fprintf (stderr, "\nWarning (%s): %s\a\n", mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt)); \
 			return 1; \
 		} \
+		fprintf (stderr, "STMT_ERROR: %s.\a\n", str); \
 		fprintf (stderr, "Error %u (%s): %s\n", mysql_stmt_errno(stmt), mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt)); \
 	} \
 	exit(5); \
 }
 
 #define stmtError(stmt, str){ \
-	fprintf (stderr, "STMT_ERROR: %s.\n", str); \
+	fprintf (stderr, "STMT_ERROR: %s.\a\n", str); \
 	if(stmt) fprintf (stderr, "Error %u (%s): %s\n", mysql_stmt_errno(stmt), mysql_stmt_sqlstate(stmt), mysql_stmt_error(stmt)); \
 	exit(5); \
 }
