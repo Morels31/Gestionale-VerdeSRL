@@ -142,7 +142,7 @@ CREATE OR REPLACE PROCEDURE getSpecie()
                 esotica,
                 giardAppart,
                 CASE WHEN colore = '' THEN 'verde' ELSE 'fiorita' END AS verdeFiorita
-                FROM Specie
+                FROM Specie;
 
         COMMIT;
     END;
