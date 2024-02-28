@@ -143,6 +143,7 @@ int printResultSet(MYSQL_STMT *stmt, MYSQL_BIND *outParams){
 
 	printDashes(meta);
 	mysql_free_result(meta);
+	if(mysql_stmt_reset(stmt)) stmtError(stmt, "mysql_stmt_reset() failed");
 	return 0;
 }
 
