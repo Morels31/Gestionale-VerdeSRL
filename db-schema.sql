@@ -1,8 +1,4 @@
 
-
--- CANCELLAMIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-DROP DATABASE prod;
-
 CREATE DATABASE IF NOT EXISTS prod;
 USE prod;
 
@@ -122,7 +118,7 @@ CREATE TABLE IF NOT EXISTS prod.ContieneAcquisto(
 
 DELIMITER $$$
 
-CREATE OR REPLACE PROCEDURE getSpecie()
+CREATE PROCEDURE IF NOT EXISTS getSpecie()
     BEGIN
         DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -158,7 +154,7 @@ DELIMITER ;
 
 DELIMITER $$$
 
-CREATE OR REPLACE PROCEDURE addSpecie(IN nLatino CHAR(100), IN col CHAR(30), IN nComune VARCHAR(50), IN esotic BOOLEAN, IN giardino BOOLEAN, IN fiorita BOOLEAN)
+CREATE PROCEDURE IF NOT EXISTS addSpecie(IN nLatino CHAR(100), IN col CHAR(30), IN nComune VARCHAR(50), IN esotic BOOLEAN, IN giardino BOOLEAN, IN fiorita BOOLEAN)
     BEGIN
         DECLARE n INT UNSIGNED DEFAULT 3103;
         DECLARE giardApp CHAR(15);
@@ -220,7 +216,7 @@ DELIMITER ;
 
 DELIMITER $$$
 
-CREATE OR REPLACE PROCEDURE setPrezzo(IN nLatino CHAR(100), IN col CHAR(30), IN newPrezzo INT UNSIGNED)
+CREATE PROCEDURE IF NOT EXISTS setPrezzo(IN nLatino CHAR(100), IN col CHAR(30), IN newPrezzo INT UNSIGNED)
     BEGIN
         DECLARE chck SMALLINT;
 
@@ -262,7 +258,7 @@ DELIMITER ;
 
 DELIMITER $$$
 
-CREATE OR REPLACE PROCEDURE editGiacenza(IN nLatino CHAR(100), IN col CHAR(30), IN diffGiacenza INT)
+CREATE PROCEDURE IF NOT EXISTS editGiacenza(IN nLatino CHAR(100), IN col CHAR(30), IN diffGiacenza INT)
     BEGIN
         DECLARE chck SMALLINT;
         DECLARE oldGiacenza INT;
@@ -317,7 +313,7 @@ DELIMITER ;
 
 DELIMITER $$$
 
-CREATE OR REPLACE PROCEDURE getFornitoriForSpecie(IN nLatino CHAR(100), IN col CHAR(30))
+CREATE PROCEDURE IF NOT EXISTS getFornitoriForSpecie(IN nLatino CHAR(100), IN col CHAR(30))
     BEGIN
         DECLARE chck SMALLINT;
 
@@ -360,7 +356,7 @@ DELIMITER ;
 
 DELIMITER $$$
 
-CREATE OR REPLACE PROCEDURE newBuyOrder(IN idForn INT UNSIGNED, OUT newBuyOrderId INT UNSIGNED)
+CREATE PROCEDURE IF NOT EXISTS newBuyOrder(IN idForn INT UNSIGNED, OUT newBuyOrderId INT UNSIGNED)
     BEGIN
         DECLARE chck SMALLINT;
 
@@ -399,7 +395,7 @@ DELIMITER ;
 
 DELIMITER $$$
 
-CREATE OR REPLACE PROCEDURE addSpecieToBuyOrder(IN nLatino CHAR(100), IN col CHAR(30), IN quantita INT UNSIGNED, IN buyOrderId INT UNSIGNED)
+CREATE PROCEDURE IF NOT EXISTS addSpecieToBuyOrder(IN nLatino CHAR(100), IN col CHAR(30), IN quantita INT UNSIGNED, IN buyOrderId INT UNSIGNED)
     BEGIN
         DECLARE chck SMALLINT UNSIGNED;
 
@@ -450,7 +446,7 @@ DELIMITER ;
 
 DELIMITER $$$
 
-CREATE OR REPLACE PROCEDURE newSellOrder(IN iva CHAR(15), IN contatto VARCHAR(15), OUT newSellOrderId INT UNSIGNED)
+CREATE PROCEDURE IF NOT EXISTS newSellOrder(IN iva CHAR(15), IN contatto VARCHAR(15), OUT newSellOrderId INT UNSIGNED)
     BEGIN
         DECLARE chck SMALLINT UNSIGNED;
 
@@ -483,14 +479,13 @@ DELIMITER ;
 
 
 
-
 ----------------------------------
 -- Adds a specie to a buy order --
 ----------------------------------
 
 DELIMITER $$$
 
-CREATE OR REPLACE PROCEDURE addSpecieToSellOrder(IN nLatino CHAR(100), IN col CHAR(30), IN qt INT UNSIGNED, IN sellOrderId INT UNSIGNED)
+CREATE PROCEDURE IF NOT EXISTS addSpecieToSellOrder(IN nLatino CHAR(100), IN col CHAR(30), IN qt INT UNSIGNED, IN sellOrderId INT UNSIGNED)
     BEGIN
         DECLARE chck SMALLINT UNSIGNED;
         DECLARE price INT UNSIGNED;
@@ -550,7 +545,7 @@ DELIMITER ;
 
 DELIMITER $$$
 
-CREATE OR REPLACE PROCEDURE getCostoOrdine(IN sellId INT UNSIGNED, OUT cost INT UNSIGNED)
+CREATE PROCEDURE IF NOT EXISTS getCostoOrdine(IN sellId INT UNSIGNED, OUT cost INT UNSIGNED)
     BEGIN
         DECLARE chck SMALLINT UNSIGNED;
 
@@ -590,7 +585,7 @@ DELIMITER ;
 
 DELIMITER $$$
 
-CREATE OR REPLACE PROCEDURE confirmPayment(IN sellId INT UNSIGNED)
+CREATE PROCEDURE IF NOT EXISTS confirmPayment(IN sellId INT UNSIGNED)
     BEGIN
         DECLARE chck SMALLINT UNSIGNED;
 
@@ -625,28 +620,137 @@ DELIMITER ;
 
 
 
-----------------------
--- Changes password --
-----------------------
+------------------------------------------
+-- Changes password of the current user --
+------------------------------------------
 
---DELIMITER $$$
---
---CREATE OR REPLACE PROCEDURE changePassword(IN newPsw CHAR(100))
---    BEGIN
---        DECLARE @username CHAR(128);
---        SELECT SUBSTRING_INDEX(CURRENT_USER(), '@', 1) INTO @username;
---        ALTER USER @username IDENTIFIED BY 'nuovapsw';
---    END;
---$$$
---
---DELIMITER ;
+DELIMITER $$$
+
+CREATE PROCEDURE IF NOT EXISTS changePassword(IN newPsw CHAR(100))
+    BEGIN
+
+        DECLARE EXIT HANDLER FOR SQLEXCEPTION
+        BEGIN
+            ROLLBACK;
+            RESIGNAL;
+        END;
+
+        SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+        SET TRANSACTION READ WRITE;
+        START TRANSACTION;
+
+            SET @sql = CONCAT('SET PASSWORD FOR ''',
+                SUBSTRING_INDEX(USER(), '@', 1),
+                ''' = PASSWORD(''',
+                REPLACE(newPsw,'''',''''''),
+                ''')'
+            );
+
+            EXECUTE IMMEDIATE @sql;
+            SET @sql = '';
+
+        COMMIT;
+    END;
+$$$
+
+DELIMITER ;
+
+
+
+-------------------
+-- Adds new user --
+-------------------
+
+DELIMITER $$$
+
+CREATE PROCEDURE IF NOT EXISTS newUser(IN username CHAR(128), IN password CHAR(100), IN defRole ENUM('manager','magazzino','segreteria'))
+    BEGIN
+
+        DECLARE EXIT HANDLER FOR SQLEXCEPTION
+        BEGIN
+            ROLLBACK;
+            RESIGNAL;
+        END;
+
+        SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+        SET TRANSACTION READ WRITE;
+        START TRANSACTION;
+
+            SET @sql1 = CONCAT('CREATE OR REPLACE USER ''',
+                REPLACE(username,'''',''''''),
+                ''' IDENTIFIED BY ''',
+                REPLACE(password,'''',''''''),
+                ''''
+            );
+
+            SET @sql2 = CONCAT('GRANT ''',
+                REPLACE(defRole,'''',''''''),
+                ''' TO ''',
+                REPLACE(username,'''',''''''),
+                ''''
+            );
+
+            SET @sql3 = CONCAT('SET DEFAULT ROLE ''',
+                REPLACE(defRole,'''',''''''),
+                ''' FOR ''',
+                REPLACE(username,'''',''''''),
+                ''''
+            );
+
+            EXECUTE IMMEDIATE @sql1;
+            EXECUTE IMMEDIATE @sql2;
+            EXECUTE IMMEDIATE @sql3;
+
+            SET @sql1 = '';
+            SET @sql2 = '';
+            SET @sql3 = '';
+
+        COMMIT;
+    END;
+$$$
+
+DELIMITER ;
+
+
+
+---------------------
+-- Deletes an user --
+---------------------
+
+DELIMITER $$$
+
+CREATE PROCEDURE IF NOT EXISTS dropUser(IN username CHAR(128))
+    BEGIN
+
+        DECLARE EXIT HANDLER FOR SQLEXCEPTION
+        BEGIN
+            ROLLBACK;
+            RESIGNAL;
+        END;
+
+        SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+        SET TRANSACTION READ WRITE;
+        START TRANSACTION;
+
+           SET @sql = CONCAT('DROP USER ''',
+                REPLACE(username,'''',''''''),
+                ''''
+            );
+
+            EXECUTE IMMEDIATE @sql;
+            SET @sql = '';
+
+        COMMIT;
+    END;
+$$$
+
+DELIMITER ;
 
 
 
 
 
 CREATE OR REPLACE ROLE amministratore;
-GRANT SELECT,INSERT,UPDATE,DELETE ON mysql.* TO amministratore WITH GRANT OPTION;
 GRANT EXECUTE ON PROCEDURE prod.getSpecie TO amministratore WITH GRANT OPTION;
 GRANT EXECUTE ON PROCEDURE prod.addSpecie TO amministratore WITH GRANT OPTION;
 GRANT EXECUTE ON PROCEDURE prod.setPrezzo TO amministratore WITH GRANT OPTION;
@@ -658,29 +762,33 @@ GRANT EXECUTE ON PROCEDURE prod.newSellOrder TO amministratore WITH GRANT OPTION
 GRANT EXECUTE ON PROCEDURE prod.addSpecieToSellOrder TO amministratore WITH GRANT OPTION;
 GRANT EXECUTE ON PROCEDURE prod.getCostoOrdine TO amministratore WITH GRANT OPTION;
 GRANT EXECUTE ON PROCEDURE prod.confirmPayment TO amministratore WITH GRANT OPTION;
+GRANT EXECUTE ON PROCEDURE prod.changePassword TO amministratore WITH GRANT OPTION;
+GRANT EXECUTE ON PROCEDURE prod.newUser TO amministratore;
+GRANT EXECUTE ON PROCEDURE prod.dropUser TO amministratore;
 
-CREATE OR REPLACE ROLE manager WITH ADMIN amministratore;
+CREATE OR REPLACE ROLE manager;
 GRANT EXECUTE ON PROCEDURE prod.getSpecie TO manager;
 GRANT EXECUTE ON PROCEDURE prod.addSpecie TO manager;
 GRANT EXECUTE ON PROCEDURE prod.setPrezzo TO manager;
---GRANT EXECUTE ON PROCEDURE prod.changePassword TO manager;
+GRANT EXECUTE ON PROCEDURE prod.changePassword TO manager;
 
 
-CREATE OR REPLACE ROLE magazzino WITH ADMIN amministratore;
+CREATE OR REPLACE ROLE magazzino;
 GRANT EXECUTE ON PROCEDURE prod.getSpecie TO magazzino;
 GRANT EXECUTE ON PROCEDURE prod.editGiacenza TO magazzino;
 GRANT EXECUTE ON PROCEDURE prod.getFornitoriForSpecie TO magazzino;
 GRANT EXECUTE ON PROCEDURE prod.newBuyOrder TO magazzino;
 GRANT EXECUTE ON PROCEDURE prod.addSpecieToBuyOrder TO magazzino;
+GRANT EXECUTE ON PROCEDURE prod.changePassword TO manager;
 
 
-CREATE OR REPLACE ROLE segreteria WITH ADMIN amministratore;
+CREATE OR REPLACE ROLE segreteria;
 GRANT EXECUTE ON PROCEDURE prod.getSpecie TO segreteria;
 GRANT EXECUTE ON PROCEDURE prod.newSellOrder TO segreteria;
 GRANT EXECUTE ON PROCEDURE prod.addSpecieToSellOrder TO segreteria;
 GRANT EXECUTE ON PROCEDURE prod.getCostoOrdine TO segreteria;
 GRANT EXECUTE ON PROCEDURE prod.confirmPayment TO segreteria;
-
+GRANT EXECUTE ON PROCEDURE prod.changePassword TO manager;
 
 
 
@@ -689,22 +797,3 @@ GRANT EXECUTE ON PROCEDURE prod.confirmPayment TO segreteria;
 CREATE OR REPLACE USER admin IDENTIFIED BY 'CHANGEME';
 GRANT amministratore TO admin;
 SET DEFAULT ROLE amministratore FOR admin;
-
-
-
-
-CREATE OR REPLACE USER testAdmin IDENTIFIED BY 'password';
-GRANT amministratore TO testAdmin;
-SET DEFAULT ROLE amministratore FOR testAdmin;
-
-CREATE OR REPLACE USER testManager IDENTIFIED BY 'password';
-GRANT manager TO testManager;
-SET DEFAULT ROLE manager FOR testManager;
-
-CREATE OR REPLACE USER testMagazzino IDENTIFIED BY 'password';
-GRANT magazzino TO testMagazzino;
-SET DEFAULT ROLE magazzino FOR testMagazzino;
-
-CREATE OR REPLACE USER testSegreteria IDENTIFIED BY 'password';
-GRANT segreteria TO testSegreteria;
-SET DEFAULT ROLE segreteria FOR testSegreteria;
