@@ -395,7 +395,7 @@ DELIMITER ;
 
 DELIMITER $$$
 
-CREATE PROCEDURE IF NOT EXISTS addSpecieToBuyOrder(IN nLatino CHAR(100), IN col CHAR(30), IN quantita INT UNSIGNED, IN buyOrderId INT UNSIGNED)
+CREATE PROCEDURE IF NOT EXISTS addSpecieToBuyOrder(IN nLatino CHAR(100), IN col CHAR(30), IN qt INT UNSIGNED, IN buyOrderId INT UNSIGNED)
     BEGIN
         DECLARE chck SMALLINT UNSIGNED;
 
@@ -427,10 +427,25 @@ CREATE PROCEDURE IF NOT EXISTS addSpecieToBuyOrder(IN nLatino CHAR(100), IN col 
                 AND FO.colore = col;
 
             IF( chck = 0 ) THEN
-                SIGNAL SQLSTATE '45005' SET MESSAGE_TEXT = "The fornitore of this order does not have the requested specie";
+                SIGNAL SQLSTATE '45005' SET MESSAGE_TEXT = "The fornitore of this order does not have the requested specie, or the order id is wrong";
             END IF;
 
-            INSERT INTO ContieneAcquisto ( idAcquisto, nomeLatino, colore, quantita ) VALUES ( buyOrderId, nLatino, col, quantita );
+            SELECT COUNT(*) INTO chck
+                FROM ContieneAcquisto
+                WHERE idAcquisto = buyOrderId
+                AND nomeLatino = nLatino
+                AND colore = col;
+
+            IF( chck = 0 ) THEN
+                INSERT INTO ContieneAcquisto ( idAcquisto, nomeLatino, colore, quantita )
+                    VALUES ( buyOrderId, nLatino, col, qt );
+            ELSE
+                UPDATE ContieneAcquisto
+                    SET quantita = quantita + qt
+                    WHERE idAcquisto = buyOrderId
+                    AND nomeLatino = nLatino
+                    AND colore = col;
+            END IF;
 
         COMMIT;
     END;
@@ -528,8 +543,22 @@ CREATE PROCEDURE IF NOT EXISTS addSpecieToSellOrder(IN nLatino CHAR(100), IN col
                 SET costoOrdine = costoOrdine + ( price * qt )
                 WHERE idVendita = sellOrderId;
 
-            INSERT INTO ContieneVendita ( idVendita, nomeLatino, colore, quantita )
-                VALUES ( sellOrderId, nLatino, col, qt );
+            SELECT COUNT(*) INTO chck
+                FROM ContieneVendita
+                WHERE idVendita = sellOrderId
+                AND nomeLatino = nLatino
+                AND colore = col;
+
+            IF( chck = 0 ) THEN
+                INSERT INTO ContieneVendita ( idVendita, nomeLatino, colore, quantita )
+                    VALUES ( sellOrderId, nLatino, col, qt );
+            ELSE
+                UPDATE ContieneVendita
+                    SET quantita = quantita + qt
+                    WHERE idVendita = sellOrderId
+                    AND nomeLatino = nLatino
+                    AND colore = col;
+            END IF;
 
         COMMIT;
     END;
