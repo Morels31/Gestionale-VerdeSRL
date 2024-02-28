@@ -222,6 +222,8 @@ DELIMITER $$$
 
 CREATE OR REPLACE PROCEDURE setPrezzo(IN nLatino CHAR(100), IN col CHAR(30), IN newPrezzo INT UNSIGNED)
     BEGIN
+        DECLARE chck SMALLINT;
+
         DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
             ROLLBACK;
@@ -231,6 +233,15 @@ CREATE OR REPLACE PROCEDURE setPrezzo(IN nLatino CHAR(100), IN col CHAR(30), IN 
         SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
         SET TRANSACTION READ WRITE;
         START TRANSACTION;
+
+            SELECT COUNT(*) INTO chck
+                FROM Specie
+                WHERE nomeLatino = nLatino
+                AND colore = col;
+
+            IF( chck = 0 ) THEN
+                SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = "Species not found";
+            END IF;
 
             UPDATE Specie
                 SET prezzo = newPrezzo
@@ -308,6 +319,8 @@ DELIMITER $$$
 
 CREATE OR REPLACE PROCEDURE getFornitoriForSpecie(IN nLatino CHAR(100), IN col CHAR(30))
     BEGIN
+        DECLARE chck SMALLINT;
+
         DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
             ROLLBACK;
@@ -317,6 +330,15 @@ CREATE OR REPLACE PROCEDURE getFornitoriForSpecie(IN nLatino CHAR(100), IN col C
         SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
         SET TRANSACTION READ ONLY;
         START TRANSACTION;
+
+            SELECT COUNT(*) INTO chck
+                FROM Specie
+                WHERE nomeLatino = nLatino
+                AND colore = col;
+
+            IF( chck = 0 ) THEN
+                SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = "Species not found";
+            END IF;
 
             SELECT F.idFornitore, F.nomeFornitore
                 FROM Fornitore F, Fornisce FS
@@ -340,6 +362,8 @@ DELIMITER $$$
 
 CREATE OR REPLACE PROCEDURE newBuyOrder(IN idForn INT UNSIGNED, OUT newBuyOrderId INT UNSIGNED)
     BEGIN
+        DECLARE chck SMALLINT;
+
         DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
             ROLLBACK;
@@ -349,6 +373,14 @@ CREATE OR REPLACE PROCEDURE newBuyOrder(IN idForn INT UNSIGNED, OUT newBuyOrderI
         SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
         SET TRANSACTION READ WRITE;
         START TRANSACTION;
+
+            SELECT COUNT(*) INTO chck
+                FROM Fornitore
+                WHERE idFornitore = idForn;
+
+            IF( chck = 0 ) THEN
+                SIGNAL SQLSTATE '45007' SET MESSAGE_TEXT = "Fornitore not found";
+            END IF;
 
             INSERT INTO OrdineAcquisto ( idFornitore ) VALUES ( idForn );
             SELECT LAST_INSERT_ID() INTO newBuyOrderId;
@@ -381,6 +413,14 @@ CREATE OR REPLACE PROCEDURE addSpecieToBuyOrder(IN nLatino CHAR(100), IN col CHA
         SET TRANSACTION READ WRITE;
         START TRANSACTION;
 
+            SELECT COUNT(*) INTO chck
+                FROM Specie
+                WHERE nomeLatino = nLatino
+                AND colore = col;
+
+            IF( chck = 0 ) THEN
+                SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = "Species not found";
+            END IF;
 
             SELECT COUNT(*) INTO chck
                 FROM OrdineAcquisto OA, Fornitore F, Fornisce FO
@@ -412,6 +452,8 @@ DELIMITER $$$
 
 CREATE OR REPLACE PROCEDURE newSellOrder(IN iva CHAR(15), IN contatto VARCHAR(15), OUT newSellOrderId INT UNSIGNED)
     BEGIN
+        DECLARE chck SMALLINT UNSIGNED;
+
         DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
             ROLLBACK;
@@ -421,6 +463,14 @@ CREATE OR REPLACE PROCEDURE newSellOrder(IN iva CHAR(15), IN contatto VARCHAR(15
         SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
         SET TRANSACTION READ WRITE;
         START TRANSACTION;
+
+            SELECT COUNT(*) INTO chck
+                FROM Rivendita
+                WHERE pIVA = iva;
+
+            IF( chck = 0 ) THEN
+                SIGNAL SQLSTATE '45008' SET MESSAGE_TEXT = "Rivendita not found";
+            END IF;
 
             INSERT INTO OrdineVendita ( pIVA, contattoSpediz ) VALUES ( iva, contatto );
             SELECT LAST_INSERT_ID() INTO newSellOrderId;
@@ -442,6 +492,7 @@ DELIMITER $$$
 
 CREATE OR REPLACE PROCEDURE addSpecieToSellOrder(IN nLatino CHAR(100), IN col CHAR(30), IN qt INT UNSIGNED, IN sellOrderId INT UNSIGNED)
     BEGIN
+        DECLARE chck SMALLINT UNSIGNED;
         DECLARE price INT UNSIGNED;
         DECLARE giacenzaAtt INT;
 
@@ -454,6 +505,15 @@ CREATE OR REPLACE PROCEDURE addSpecieToSellOrder(IN nLatino CHAR(100), IN col CH
         SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
         SET TRANSACTION READ WRITE;
         START TRANSACTION;
+
+            SELECT COUNT(*) INTO chck
+                FROM Specie
+                WHERE nomeLatino = nLatino
+                AND colore = col;
+
+            IF( chck = 0 ) THEN
+                SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = "Species not found";
+            END IF;
 
             SELECT giacenza, prezzo INTO giacenzaAtt, price
                 FROM Specie
@@ -492,6 +552,8 @@ DELIMITER $$$
 
 CREATE OR REPLACE PROCEDURE getCostoOrdine(IN sellId INT UNSIGNED, OUT cost INT UNSIGNED)
     BEGIN
+        DECLARE chck SMALLINT UNSIGNED;
+
         DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
             ROLLBACK;
@@ -501,6 +563,14 @@ CREATE OR REPLACE PROCEDURE getCostoOrdine(IN sellId INT UNSIGNED, OUT cost INT 
         SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
         SET TRANSACTION READ ONLY;
         START TRANSACTION;
+
+            SELECT COUNT(*) INTO chck
+                FROM OrdineVendita
+                WHERE idVendita = sellId;
+
+            IF( chck = 0 ) THEN
+                SIGNAL SQLSTATE '45009' SET MESSAGE_TEXT = "There isn't a sell order with this id";
+            END IF;
 
             SELECT costoOrdine INTO cost
                 FROM OrdineVendita
@@ -522,6 +592,8 @@ DELIMITER $$$
 
 CREATE OR REPLACE PROCEDURE confirmPayment(IN sellId INT UNSIGNED)
     BEGIN
+        DECLARE chck SMALLINT UNSIGNED;
+
         DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
             ROLLBACK;
@@ -531,6 +603,15 @@ CREATE OR REPLACE PROCEDURE confirmPayment(IN sellId INT UNSIGNED)
         SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
         SET TRANSACTION READ WRITE;
         START TRANSACTION;
+
+
+            SELECT COUNT(*) INTO chck
+                FROM OrdineVendita
+                WHERE idVendita = sellId;
+
+            IF( chck = 0 ) THEN
+                SIGNAL SQLSTATE '45009' SET MESSAGE_TEXT = "There isn't a sell order with this id";
+            END IF;
 
             UPDATE OrdineVendita
                 SET pagato = 1
