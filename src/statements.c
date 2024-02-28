@@ -177,7 +177,7 @@ void initDropUser(MYSQL *conn, dropUserStruct *st){
 
 void initGetSpecie(MYSQL *conn, getSpecieStruct *st){
 
-	st->stmt = initStmt(conn, "SELECT nomeLatino, colore, nomeComune, giacenza, prezzo, esotica, giardAppart, CASE WHEN colore = '' THEN 'verde' ELSE 'fiorita' END AS verdeFiorita FROM Specie");
+	st->stmt = initStmt(conn, "CALL getSpecie()");
 
 	st->outParams[0] = getBindParam(MYSQL_TYPE_STRING, st->nomeLatino, MAX_NOME_LATINO_LEN);
 	st->outParams[1] = getBindParam(MYSQL_TYPE_STRING, st->colore, MAX_COLORE_LEN);

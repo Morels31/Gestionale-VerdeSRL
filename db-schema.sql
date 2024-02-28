@@ -116,6 +116,39 @@ CREATE TABLE IF NOT EXISTS prod.ContieneAcquisto(
 
 
 
+-----------------------------
+-- Returns all the species --
+-----------------------------
+
+DELIMITER $$$
+
+CREATE OR REPLACE PROCEDURE getSpecie()
+    BEGIN
+        DECLARE EXIT HANDLER FOR SQLEXCEPTION
+        BEGIN
+            ROLLBACK;
+            RESIGNAL;
+        END;
+
+        SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+        SET TRANSACTION READ ONLY;
+        START TRANSACTION;
+
+            SELECT nomeLatino,
+                colore,
+                nomeComune,
+                giacenza,
+                prezzo,
+                esotica,
+                giardAppart,
+                CASE WHEN colore = '' THEN 'verde' ELSE 'fiorita' END AS verdeFiorita
+                FROM Specie
+
+        COMMIT;
+    END;
+$$$
+
+DELIMITER ;
 
 
 
@@ -515,17 +548,17 @@ DELIMITER ;
 -- Changes password --
 ----------------------
 
-DELIMITER $$$
-
-CREATE OR REPLACE PROCEDURE changePassword(IN newPsw CHAR(100))
-    BEGIN
-        DECLARE @username CHAR(128);
-        SELECT SUBSTRING_INDEX(CURRENT_USER(), '@', 1) INTO @username;
-        ALTER USER @username IDENTIFIED BY 'nuovapsw';
-    END;
-$$$
-
-DELIMITER ;
+--DELIMITER $$$
+--
+--CREATE OR REPLACE PROCEDURE changePassword(IN newPsw CHAR(100))
+--    BEGIN
+--        DECLARE @username CHAR(128);
+--        SELECT SUBSTRING_INDEX(CURRENT_USER(), '@', 1) INTO @username;
+--        ALTER USER @username IDENTIFIED BY 'nuovapsw';
+--    END;
+--$$$
+--
+--DELIMITER ;
 
 
 
@@ -533,7 +566,7 @@ DELIMITER ;
 
 CREATE OR REPLACE ROLE amministratore;
 GRANT SELECT,INSERT,UPDATE,DELETE ON mysql.* TO amministratore WITH GRANT OPTION;
-GRANT SELECT ON prod.Specie TO amministratore WITH GRANT OPTION;
+GRANT EXECUTE ON PROCEDURE prod.getSpecie TO amministratore WITH GRANT OPTION;
 GRANT EXECUTE ON PROCEDURE prod.addSpecie TO amministratore WITH GRANT OPTION;
 GRANT EXECUTE ON PROCEDURE prod.setPrezzo TO amministratore WITH GRANT OPTION;
 GRANT EXECUTE ON PROCEDURE prod.editGiacenza TO amministratore WITH GRANT OPTION;
@@ -546,14 +579,14 @@ GRANT EXECUTE ON PROCEDURE prod.getCostoOrdine TO amministratore WITH GRANT OPTI
 GRANT EXECUTE ON PROCEDURE prod.confirmPayment TO amministratore WITH GRANT OPTION;
 
 CREATE OR REPLACE ROLE manager WITH ADMIN amministratore;
-GRANT SELECT ON prod.Specie TO manager;
+GRANT EXECUTE ON PROCEDURE prod.getSpecie TO manager;
 GRANT EXECUTE ON PROCEDURE prod.addSpecie TO manager;
 GRANT EXECUTE ON PROCEDURE prod.setPrezzo TO manager;
-GRANT EXECUTE ON PROCEDURE prod.changePassword TO manager;
+--GRANT EXECUTE ON PROCEDURE prod.changePassword TO manager;
 
 
 CREATE OR REPLACE ROLE magazzino WITH ADMIN amministratore;
-GRANT SELECT ON prod.Specie TO magazzino;
+GRANT EXECUTE ON PROCEDURE prod.getSpecie TO magazzino;
 GRANT EXECUTE ON PROCEDURE prod.editGiacenza TO magazzino;
 GRANT EXECUTE ON PROCEDURE prod.getFornitoriForSpecie TO magazzino;
 GRANT EXECUTE ON PROCEDURE prod.newBuyOrder TO magazzino;
@@ -561,7 +594,7 @@ GRANT EXECUTE ON PROCEDURE prod.addSpecieToBuyOrder TO magazzino;
 
 
 CREATE OR REPLACE ROLE segreteria WITH ADMIN amministratore;
-GRANT SELECT ON prod.Specie TO segreteria;
+GRANT EXECUTE ON PROCEDURE prod.getSpecie TO segreteria;
 GRANT EXECUTE ON PROCEDURE prod.newSellOrder TO segreteria;
 GRANT EXECUTE ON PROCEDURE prod.addSpecieToSellOrder TO segreteria;
 GRANT EXECUTE ON PROCEDURE prod.getCostoOrdine TO segreteria;
@@ -579,15 +612,18 @@ SET DEFAULT ROLE amministratore FOR admin;
 
 
 
+CREATE OR REPLACE USER testAdmin IDENTIFIED BY 'password';
+GRANT amministratore TO testAdmin;
+SET DEFAULT ROLE amministratore FOR testAdmin;
 
 CREATE OR REPLACE USER testManager IDENTIFIED BY 'password';
 GRANT manager TO testManager;
 SET DEFAULT ROLE manager FOR testManager;
 
 CREATE OR REPLACE USER testMagazzino IDENTIFIED BY 'password';
-GRANT manager TO testMagazzino;
-SET DEFAULT ROLE manager FOR testMagazzino;
+GRANT magazzino TO testMagazzino;
+SET DEFAULT ROLE magazzino FOR testMagazzino;
 
 CREATE OR REPLACE USER testSegreteria IDENTIFIED BY 'password';
-GRANT manager TO testSegreteria;
-SET DEFAULT ROLE manager FOR testSegreteria;
+GRANT segreteria TO testSegreteria;
+SET DEFAULT ROLE segreteria FOR testSegreteria;

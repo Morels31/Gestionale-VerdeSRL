@@ -156,7 +156,8 @@ void changePassword(changePasswordStruct *st){
 	readPassword("Enter new password: ", st->newPsw);
 	st->inParams[0].buffer_length = strlen(st->newPsw);
 
-	if(!EXEC_STMT(st)) printf("\nPassword changed successfully\n");
+	if(!EXEC_STMT(st))
+		printf("\nPassword changed successfully\n");
 }
 
 
