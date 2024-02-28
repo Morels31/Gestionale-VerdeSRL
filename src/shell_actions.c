@@ -206,3 +206,10 @@ void dropUser(dropUserStruct *st){
 	if(!EXEC_STMT(st))
 		printf("\n\n%sUser '%s' deleted successfully.%s\n", GREEN_COLOR, st->username, RESET_COLOR);
 }
+
+
+
+void clearScreen(){
+	printf("\033[2J\033[H");
+	fflush(stdout);
+}

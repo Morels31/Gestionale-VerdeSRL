@@ -17,8 +17,8 @@ int main(int argc, char **argv){
 	unsigned nOptSpecified = parseCmdLine(argc, argv, &dbInfo);
 
 	if(nOptNotImported==3 && !nOptSpecified){
-		printf("Warning: no connection options specified, using defaults.\n");
-		printf("Execute \"%s -?\" for the help message.\n\n\n", argv[0]);
+		printf("\n%sWarning: no connection options specified, using defaults.%s\n", YELLOW_COLOR, RESET_COLOR);
+		printf("Execute \"%s -?\" for the help message.\n\n", argv[0]);
 	}
 
 	putchar('\n');

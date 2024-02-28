@@ -15,3 +15,4 @@ void confirmPayment(confirmPaymentStruct *st, unsigned long lastSellOrderId);
 void changePassword(changePasswordStruct *st);
 void addNewUser(addNewUserStruct *st);
 void dropUser(dropUserStruct *st);
+void clearScreen();

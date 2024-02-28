@@ -23,7 +23,7 @@ void shellMagazzino(MYSQL *conn){
 	unsigned loop = 1;
 	unsigned selection;
 	while(loop){
-		selection = multipleChoice("\nSelect beetween those actions: ", "Get specie", "Edit stock quantity", "Search which fornitori have a specific specie", "New buy order", "Add specie to buy order", "Change password", "Quit", NULL);
+		selection = multipleChoice("\nSelect beetween those actions: ", "Get specie", "Edit stock quantity", "Search which fornitori have a specific specie", "New buy order", "Add specie to buy order", "Clear screen", "Change password", "Quit", NULL);
 
 		switch(selection) {
 			case 1:
@@ -42,9 +42,12 @@ void shellMagazzino(MYSQL *conn){
 				addSpecieToBuyOrder(&addSpecieToBuyOrderS, newBuyOrderS.outBuyOrderId);
 				break;
 			case 6:
-				changePassword(&changePasswordS);
+				clearScreen();
 				break;
 			case 7:
+				changePassword(&changePasswordS);
+				break;
+			case 8:
 				loop = 0;
 				break;
 			default:

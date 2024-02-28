@@ -809,7 +809,7 @@ DELIMITER ;
 
 
 
-CREATE OR REPLACE ROLE amministratore;
+CREATE ROLE IF NOT EXISTS amministratore;
 GRANT EXECUTE ON PROCEDURE prod.getSpecie TO amministratore WITH GRANT OPTION;
 GRANT EXECUTE ON PROCEDURE prod.addSpecie TO amministratore WITH GRANT OPTION;
 GRANT EXECUTE ON PROCEDURE prod.setPrezzo TO amministratore WITH GRANT OPTION;
@@ -825,14 +825,14 @@ GRANT EXECUTE ON PROCEDURE prod.changePassword TO amministratore WITH GRANT OPTI
 GRANT EXECUTE ON PROCEDURE prod.newUser TO amministratore;
 GRANT EXECUTE ON PROCEDURE prod.dropUser TO amministratore;
 
-CREATE OR REPLACE ROLE manager;
+CREATE ROLE IF NOT EXISTS manager;
 GRANT EXECUTE ON PROCEDURE prod.getSpecie TO manager;
 GRANT EXECUTE ON PROCEDURE prod.addSpecie TO manager;
 GRANT EXECUTE ON PROCEDURE prod.setPrezzo TO manager;
 GRANT EXECUTE ON PROCEDURE prod.changePassword TO manager;
 
 
-CREATE OR REPLACE ROLE magazzino;
+CREATE ROLE IF NOT EXISTS magazzino;
 GRANT EXECUTE ON PROCEDURE prod.getSpecie TO magazzino;
 GRANT EXECUTE ON PROCEDURE prod.editGiacenza TO magazzino;
 GRANT EXECUTE ON PROCEDURE prod.getFornitoriForSpecie TO magazzino;
@@ -841,7 +841,7 @@ GRANT EXECUTE ON PROCEDURE prod.addSpecieToBuyOrder TO magazzino;
 GRANT EXECUTE ON PROCEDURE prod.changePassword TO magazzino;
 
 
-CREATE OR REPLACE ROLE segreteria;
+CREATE ROLE IF NOT EXISTS segreteria;
 GRANT EXECUTE ON PROCEDURE prod.getSpecie TO segreteria;
 GRANT EXECUTE ON PROCEDURE prod.newSellOrder TO segreteria;
 GRANT EXECUTE ON PROCEDURE prod.addSpecieToSellOrder TO segreteria;

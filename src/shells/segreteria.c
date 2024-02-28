@@ -24,7 +24,7 @@ void shellSegreteria(MYSQL *conn){
 	unsigned loop = 1;
 	unsigned selection;
 	while(loop){
-		selection = multipleChoice("\nSelect beetween those actions: ", "Get specie", "New sell order", "Add specie to sell order", "Get order cost", "Confirm order payment", "Change password", "Quit", NULL);
+		selection = multipleChoice("\nSelect beetween those actions: ", "Get specie", "New sell order", "Add specie to sell order", "Get order cost", "Confirm order payment", "Clear screen", "Change password", "Quit", NULL);
 
 		switch(selection) {
 			case 1:
@@ -43,9 +43,12 @@ void shellSegreteria(MYSQL *conn){
 				confirmPayment(&confirmPaymentS, newSellOrderS.outSellOrderId);
 				break;
 			case 6:
-				changePassword(&changePasswordS);
+				clearScreen();
 				break;
 			case 7:
+				changePassword(&changePasswordS);
+				break;
+			case 8:
 				loop = 0;
 				break;
 			default:

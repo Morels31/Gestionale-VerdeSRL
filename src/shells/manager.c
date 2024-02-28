@@ -20,7 +20,7 @@ void shellManager(MYSQL *conn){
 	unsigned loop = 1;
 	unsigned selection;
 	while(loop){
-		selection = multipleChoice("\nSelect beetween those actions: ", "Get specie", "Add specie", "Set prezzo specie", "Change password", "Quit", NULL);
+		selection = multipleChoice("\nSelect beetween those actions: ", "Get specie", "Add specie", "Set prezzo specie", "Clear screen", "Change password", "Quit", NULL);
 
 		switch(selection) {
 			case 1:
@@ -33,9 +33,12 @@ void shellManager(MYSQL *conn){
 				setPrezzo(&setPrezzoS);
 				break;
 			case 4:
-				changePassword(&changePasswordS);
+				clearScreen();
 				break;
 			case 5:
+				changePassword(&changePasswordS);
+				break;
+			case 6:
 				loop = 0;
 				break;
 			default:

@@ -18,7 +18,7 @@ void shellAmministratore(MYSQL *conn){
 	unsigned loop = 1;
 	unsigned selection;
 	while(loop){
-		selection = multipleChoice("\nSelect beetween those actions: ", "Add/Overwrite user", "Delete user", "Change password", "Quit", NULL);
+		selection = multipleChoice("\nSelect beetween those actions: ", "Add/Overwrite user", "Delete user", "Clear screen", "Change password", "Quit", NULL);
 
 		switch(selection) {
 			case 1:
@@ -28,9 +28,12 @@ void shellAmministratore(MYSQL *conn){
 				dropUser(&dropUserS);
 				break;
 			case 3:
-				changePassword(&changePasswordS);
+				clearScreen();
 				break;
 			case 4:
+				changePassword(&changePasswordS);
+				break;
+			case 5:
 				loop = 0;
 				break;
 			default:
