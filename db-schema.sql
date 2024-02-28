@@ -838,7 +838,7 @@ GRANT EXECUTE ON PROCEDURE prod.editGiacenza TO magazzino;
 GRANT EXECUTE ON PROCEDURE prod.getFornitoriForSpecie TO magazzino;
 GRANT EXECUTE ON PROCEDURE prod.newBuyOrder TO magazzino;
 GRANT EXECUTE ON PROCEDURE prod.addSpecieToBuyOrder TO magazzino;
-GRANT EXECUTE ON PROCEDURE prod.changePassword TO manager;
+GRANT EXECUTE ON PROCEDURE prod.changePassword TO magazzino;
 
 
 CREATE OR REPLACE ROLE segreteria;
@@ -847,7 +847,7 @@ GRANT EXECUTE ON PROCEDURE prod.newSellOrder TO segreteria;
 GRANT EXECUTE ON PROCEDURE prod.addSpecieToSellOrder TO segreteria;
 GRANT EXECUTE ON PROCEDURE prod.getCostoOrdine TO segreteria;
 GRANT EXECUTE ON PROCEDURE prod.confirmPayment TO segreteria;
-GRANT EXECUTE ON PROCEDURE prod.changePassword TO manager;
+GRANT EXECUTE ON PROCEDURE prod.changePassword TO segreteria;
 
 
 
