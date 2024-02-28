@@ -419,6 +419,14 @@ CREATE PROCEDURE IF NOT EXISTS addSpecieToBuyOrder(IN nLatino CHAR(100), IN col 
             END IF;
 
             SELECT COUNT(*) INTO chck
+                FROM OrdineAcquisto
+                WHERE idAcquisto = buyOrderId;
+
+            IF( chck = 0 ) THEN
+                SIGNAL SQLSTATE '45012' SET MESSAGE_TEXT = "There isn't a buy order with this id.";
+            END IF;
+
+            SELECT COUNT(*) INTO chck
                 FROM OrdineAcquisto OA, Fornitore F, Fornisce FO
                 WHERE OA.idAcquisto = buyOrderId
                 AND OA.idFornitore = F.idFornitore
@@ -538,6 +546,10 @@ CREATE PROCEDURE IF NOT EXISTS addSpecieToSellOrder(IN nLatino CHAR(100), IN col
             SELECT pagato INTO pagatoChck
                 FROM OrdineVendita
                 WHERE idVendita = sellOrderId;
+
+            IF( pagatoChck IS NULL ) THEN
+                SIGNAL SQLSTATE '45009' SET MESSAGE_TEXT = "There isn't a sell order with this id.";
+            END IF;
 
             IF( pagatoChck = true ) THEN
                 SIGNAL SQLSTATE '45011' SET MESSAGE_TEXT = "Can't add a specie to an already payed order.";
