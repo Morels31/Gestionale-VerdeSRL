@@ -171,7 +171,7 @@ CREATE PROCEDURE IF NOT EXISTS addSpecie(IN nLatino CHAR(100), IN col CHAR(30), 
             
             IF( fiorita = true ) THEN
                 IF( col = "" ) THEN
-                    SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = "Cannot have an empty string to a specie fiorita";
+                    SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = "Cannot have an empty string to a specie fiorita.";
                 END IF;
                 SELECT COUNT(*) INTO n
                     FROM Specie
@@ -179,7 +179,7 @@ CREATE PROCEDURE IF NOT EXISTS addSpecie(IN nLatino CHAR(100), IN col CHAR(30), 
                     AND colore = "";
             ELSE
                 IF( col != "" ) THEN
-                    SIGNAL SQLSTATE '45103' SET MESSAGE_TEXT = "Color of a specie verde has to be an empty string";
+                    SIGNAL SQLSTATE '45103' SET MESSAGE_TEXT = "Color of a specie verde has to be an empty string.";
                 END IF;
                 SELECT COUNT(*) INTO n
                     FROM Specie
@@ -188,7 +188,7 @@ CREATE PROCEDURE IF NOT EXISTS addSpecie(IN nLatino CHAR(100), IN col CHAR(30), 
             END IF;
 
             IF( n != 0 ) THEN
-                SIGNAL SQLSTATE '45203' SET MESSAGE_TEXT = "Wrong specie's type";
+                SIGNAL SQLSTATE '45203' SET MESSAGE_TEXT = "Wrong specie's type.";
             END IF;
 
 
@@ -236,7 +236,7 @@ CREATE PROCEDURE IF NOT EXISTS setPrezzo(IN nLatino CHAR(100), IN col CHAR(30), 
                 AND colore = col;
 
             IF( chck = 0 ) THEN
-                SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = "Species not found";
+                SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = "Species not found.";
             END IF;
 
             UPDATE Specie
@@ -280,7 +280,7 @@ CREATE PROCEDURE IF NOT EXISTS editGiacenza(IN nLatino CHAR(100), IN col CHAR(30
                 AND colore = col;
 
             IF( chck = 0 ) THEN
-                SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = "Species not found";
+                SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = "Species not found.";
             END IF;
 
             SELECT giacenza INTO oldGiacenza
@@ -291,7 +291,7 @@ CREATE PROCEDURE IF NOT EXISTS editGiacenza(IN nLatino CHAR(100), IN col CHAR(30
             SET newGiacenza = oldGiacenza + diffGiacenza;
 
             IF( newGiacenza < 0 ) THEN
-                SIGNAL SQLSTATE '45004' SET MESSAGE_TEXT = "Not enough stock";
+                SIGNAL SQLSTATE '45004' SET MESSAGE_TEXT = "Not enough stock.";
             END IF;
 
 			UPDATE Specie
@@ -333,7 +333,7 @@ CREATE PROCEDURE IF NOT EXISTS getFornitoriForSpecie(IN nLatino CHAR(100), IN co
                 AND colore = col;
 
             IF( chck = 0 ) THEN
-                SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = "Species not found";
+                SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = "Species not found.";
             END IF;
 
             SELECT F.idFornitore, F.nomeFornitore
@@ -375,7 +375,7 @@ CREATE PROCEDURE IF NOT EXISTS newBuyOrder(IN idForn INT UNSIGNED, OUT newBuyOrd
                 WHERE idFornitore = idForn;
 
             IF( chck = 0 ) THEN
-                SIGNAL SQLSTATE '45007' SET MESSAGE_TEXT = "Fornitore not found";
+                SIGNAL SQLSTATE '45007' SET MESSAGE_TEXT = "Fornitore not found.";
             END IF;
 
             INSERT INTO OrdineAcquisto ( idFornitore ) VALUES ( idForn );
@@ -415,7 +415,7 @@ CREATE PROCEDURE IF NOT EXISTS addSpecieToBuyOrder(IN nLatino CHAR(100), IN col 
                 AND colore = col;
 
             IF( chck = 0 ) THEN
-                SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = "Species not found";
+                SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = "Species not found.";
             END IF;
 
             SELECT COUNT(*) INTO chck
@@ -427,7 +427,7 @@ CREATE PROCEDURE IF NOT EXISTS addSpecieToBuyOrder(IN nLatino CHAR(100), IN col 
                 AND FO.colore = col;
 
             IF( chck = 0 ) THEN
-                SIGNAL SQLSTATE '45005' SET MESSAGE_TEXT = "The fornitore of this order does not have the requested specie, or the order id is wrong";
+                SIGNAL SQLSTATE '45005' SET MESSAGE_TEXT = "The fornitore of this order does not have the requested specie, or the order id is wrong.";
             END IF;
 
             SELECT COUNT(*) INTO chck
@@ -480,7 +480,7 @@ CREATE PROCEDURE IF NOT EXISTS newSellOrder(IN iva CHAR(15), IN contatto VARCHAR
                 WHERE pIVA = iva;
 
             IF( chck = 0 ) THEN
-                SIGNAL SQLSTATE '45008' SET MESSAGE_TEXT = "Rivendita not found";
+                SIGNAL SQLSTATE '45008' SET MESSAGE_TEXT = "Rivendita not found.";
             END IF;
 
             INSERT INTO OrdineVendita ( pIVA, contattoSpediz ) VALUES ( iva, contatto );
@@ -505,6 +505,7 @@ CREATE PROCEDURE IF NOT EXISTS addSpecieToSellOrder(IN nLatino CHAR(100), IN col
         DECLARE chck SMALLINT UNSIGNED;
         DECLARE price INT UNSIGNED;
         DECLARE giacenzaAtt INT;
+        DECLARE pagatoChck BOOL;
 
         DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -522,7 +523,7 @@ CREATE PROCEDURE IF NOT EXISTS addSpecieToSellOrder(IN nLatino CHAR(100), IN col
                 AND colore = col;
 
             IF( chck = 0 ) THEN
-                SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = "Species not found";
+                SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = "Species not found.";
             END IF;
 
             SELECT giacenza, prezzo INTO giacenzaAtt, price
@@ -531,7 +532,15 @@ CREATE PROCEDURE IF NOT EXISTS addSpecieToSellOrder(IN nLatino CHAR(100), IN col
                 AND colore = col;
 
             IF( giacenzaAtt < qt ) THEN
-                SIGNAL SQLSTATE '45006' SET MESSAGE_TEXT = "There isn't enough stock of this species in the wharehouse";
+                SIGNAL SQLSTATE '45006' SET MESSAGE_TEXT = "There isn't enough stock of this species in the wharehouse.";
+            END IF;
+
+            SELECT pagato INTO pagatoChck
+                FROM OrdineVendita
+                WHERE idVendita = sellOrderId;
+
+            IF( pagatoChck = true ) THEN
+                SIGNAL SQLSTATE '45011' SET MESSAGE_TEXT = "Can't add a specie to an already payed order.";
             END IF;
 
             UPDATE Specie
@@ -593,7 +602,7 @@ CREATE PROCEDURE IF NOT EXISTS getCostoOrdine(IN sellId INT UNSIGNED, OUT cost I
                 WHERE idVendita = sellId;
 
             IF( chck = 0 ) THEN
-                SIGNAL SQLSTATE '45009' SET MESSAGE_TEXT = "There isn't a sell order with this id";
+                SIGNAL SQLSTATE '45009' SET MESSAGE_TEXT = "There isn't a sell order with this id.";
             END IF;
 
             SELECT costoOrdine INTO cost
@@ -634,7 +643,7 @@ CREATE PROCEDURE IF NOT EXISTS confirmPayment(IN sellId INT UNSIGNED)
                 WHERE idVendita = sellId;
 
             IF( chck = 0 ) THEN
-                SIGNAL SQLSTATE '45009' SET MESSAGE_TEXT = "There isn't a sell order with this id";
+                SIGNAL SQLSTATE '45009' SET MESSAGE_TEXT = "There isn't a sell order with this id.";
             END IF;
 
             UPDATE OrdineVendita
@@ -750,6 +759,7 @@ DELIMITER $$$
 
 CREATE PROCEDURE IF NOT EXISTS dropUser(IN username CHAR(128))
     BEGIN
+        DECLARE chck SMALLINT UNSIGNED;
 
         DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -760,6 +770,14 @@ CREATE PROCEDURE IF NOT EXISTS dropUser(IN username CHAR(128))
         SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
         SET TRANSACTION READ WRITE;
         START TRANSACTION;
+
+            SELECT COUNT(*) INTO chck
+                FROM mysql.user
+                WHERE User = username;
+
+            IF( chck = 0 ) THEN
+                SIGNAL SQLSTATE '45010' SET MESSAGE_TEXT = "The inserted user does not exists.";
+            END IF;
 
            SET @sql = CONCAT('DROP USER ''',
                 REPLACE(username,'''',''''''),
