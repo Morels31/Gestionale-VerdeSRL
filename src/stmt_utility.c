@@ -139,9 +139,9 @@ int printResultSet(MYSQL_STMT *stmt, MYSQL_BIND *outParams){
 				printBindedVar(&outParams[i], (int)field->max_length);
 		}
 		putchar('\n');
-		printDashes(meta);
 	}
 
+	printDashes(meta);
 	mysql_free_result(meta);
 	return 0;
 }
