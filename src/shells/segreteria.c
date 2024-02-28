@@ -44,7 +44,6 @@ void shellSegreteria(MYSQL *conn){
 				break;
 			case 6:
 				changePassword(&changePasswordS);
-				memset(changePasswordS.newPsw, 0, MAX_PASSWORD_LEN);
 				break;
 			case 7:
 				loop = 0;

@@ -34,7 +34,6 @@ void shellManager(MYSQL *conn){
 				break;
 			case 4:
 				changePassword(&changePasswordS);
-				memset(changePasswordS.newPsw, 0, MAX_PASSWORD_LEN);
 				break;
 			case 5:
 				loop = 0;

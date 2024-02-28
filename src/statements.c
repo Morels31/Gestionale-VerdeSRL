@@ -5,6 +5,26 @@
 
 
 
+void initGetSpecie(MYSQL *conn, getSpecieStruct *st){
+
+	st->stmt = initStmt(conn, "CALL getSpecie()");
+
+	st->outParams[0] = getBindParam(MYSQL_TYPE_STRING, st->nomeLatino, MAX_NOME_LATINO_LEN);
+	st->outParams[1] = getBindParam(MYSQL_TYPE_STRING, st->colore, MAX_COLORE_LEN);
+	st->outParams[2] = getBindParam(MYSQL_TYPE_VAR_STRING, st->nomeComune,MAX_NOME_COMUNE_LEN);
+	st->outParams[3] = getBindParam(MYSQL_TYPE_LONG, &st->giacenza, sizeof(st->giacenza));
+	st->outParams[4] = getBindParam(MYSQL_TYPE_LONG, &st->prezzo, sizeof(st->prezzo));
+	st->outParams[5] = getBindParam(MYSQL_TYPE_TINY, &st->esotica, sizeof(st->esotica));
+	st->outParams[6] = getBindParam(MYSQL_TYPE_STRING, st->giardAppart, MAX_GIARD_APPART_LEN);
+	st->outParams[7] = getBindParam(MYSQL_TYPE_STRING, st->verdeFiorita, MAX_VERDE_FIORITA_LEN);
+
+	st->outParams[4].is_unsigned = 1;
+
+	st->postExecFunc = &printResultSet;
+}
+
+
+
 void initAddSpecie(MYSQL *conn, addSpecieStruct *st){
 
 	st->stmt = initStmt(conn, "CALL addSpecie( ? , ? , ? , ?, ?, ? )");
@@ -145,7 +165,7 @@ void initConfirmPayment(MYSQL *conn, confirmPaymentStruct *st){
 
 void initChangePassword(MYSQL *conn, changePasswordStruct *st){
 
-	st->stmt = initStmt(conn, "SET PASSWORD = PASSWORD('?')");
+	st->stmt = initStmt(conn, "CALL changePassword( ? )");
 
 	st->inParams[0] = getBindParam(MYSQL_TYPE_STRING, st->newPsw, 0);
 }
@@ -154,41 +174,18 @@ void initChangePassword(MYSQL *conn, changePasswordStruct *st){
 
 void initAddNewUser(MYSQL *conn, addNewUserStruct *st){
 
-	st->stmt = initStmt(conn, "CREATE OR REPLACE USER ? IDENTIFIED BY ? ; GRANT ? TO ? ; SET DEFAULT ROLE ? FOR ? ");
+	st->stmt = initStmt(conn, "CALL newUser( ? , ? , ? )");
 
 	st->inParams[0] = getBindParam(MYSQL_TYPE_STRING, st->username, 0);
 	st->inParams[1] = getBindParam(MYSQL_TYPE_STRING, st->password, 0);
 	st->inParams[2] = getBindParam(MYSQL_TYPE_STRING, st->role, 0);
-	st->inParams[3] = getBindParam(MYSQL_TYPE_STRING, st->username, 0);
-	st->inParams[2] = getBindParam(MYSQL_TYPE_STRING, st->role, 0);
-	st->inParams[3] = getBindParam(MYSQL_TYPE_STRING, st->username, 0);
 }
 
 
 
 void initDropUser(MYSQL *conn, dropUserStruct *st){
 
-	st->stmt = initStmt(conn, "DROP USER IF EXISTS ?");
+	st->stmt = initStmt(conn, "CALL dropUser( ? )");
 
 	st->inParams[0] = getBindParam(MYSQL_TYPE_STRING, st->username, 0);
-}
-
-
-
-void initGetSpecie(MYSQL *conn, getSpecieStruct *st){
-
-	st->stmt = initStmt(conn, "CALL getSpecie()");
-
-	st->outParams[0] = getBindParam(MYSQL_TYPE_STRING, st->nomeLatino, MAX_NOME_LATINO_LEN);
-	st->outParams[1] = getBindParam(MYSQL_TYPE_STRING, st->colore, MAX_COLORE_LEN);
-	st->outParams[2] = getBindParam(MYSQL_TYPE_VAR_STRING, st->nomeComune,MAX_NOME_COMUNE_LEN);
-	st->outParams[3] = getBindParam(MYSQL_TYPE_LONG, &st->giacenza, sizeof(st->giacenza));
-	st->outParams[4] = getBindParam(MYSQL_TYPE_LONG, &st->prezzo, sizeof(st->prezzo));
-	st->outParams[5] = getBindParam(MYSQL_TYPE_TINY, &st->esotica, sizeof(st->esotica));
-	st->outParams[6] = getBindParam(MYSQL_TYPE_STRING, st->giardAppart, MAX_GIARD_APPART_LEN);
-	st->outParams[7] = getBindParam(MYSQL_TYPE_STRING, st->verdeFiorita, MAX_VERDE_FIORITA_LEN);
-
-	st->outParams[4].is_unsigned = 1;
-
-	st->postExecFunc = &printResultSet;
 }

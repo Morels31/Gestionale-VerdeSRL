@@ -3,13 +3,34 @@
 #include <mysql.h>
 
 
+
 #define EXEC_STMT(stmtS) execStmt((stmtS)->stmt, (stmtS)->inParams, (stmtS)->outParams, (stmtS)->postExecFunc)
+
 
 
 /*
  *  Inizialing those struct to 0 will set all the '*in/outParams' pointers to NULL,
  *  so that the function execStmt() can recognize if it needs to bind input/output parameters.
+ *  the same applies to 'postExecFunc' optional function pointer.
  */
+
+
+
+typedef struct getSpecieStatementStruct {
+        MYSQL_STMT *stmt;
+        MYSQL_BIND *inParams;
+        MYSQL_BIND outParams[8];
+        int (*postExecFunc)(MYSQL_STMT *, MYSQL_BIND *);
+        char nomeLatino[MAX_NOME_LATINO_LEN+1];
+        char colore[MAX_COLORE_LEN+1];
+        char nomeComune[MAX_NOME_COMUNE_LEN+1];
+        long giacenza;
+        unsigned long prezzo;
+        signed char esotica;
+        char giardAppart[MAX_GIARD_APPART_LEN+1];
+        char verdeFiorita[MAX_VERDE_FIORITA_LEN+1];
+} getSpecieStruct;
+
 
 
 typedef struct addSpecieStatementStruct {
@@ -51,7 +72,7 @@ typedef struct editGiacenzaStatementStruct {
 
 
 
-//ha un result set
+//has a result set
 typedef struct getFornitoriForSpecieStatementStruct {
         MYSQL_STMT *stmt;
         MYSQL_BIND inParams[2];
@@ -65,7 +86,7 @@ typedef struct getFornitoriForSpecieStatementStruct {
 
 
 
-//il secondo attributo è in OUT
+//the second attribute is OUT
 typedef struct newBuyOrderStatementStruct {
         MYSQL_STMT *stmt;
         MYSQL_BIND inParams[1];
@@ -90,7 +111,7 @@ typedef struct addSpecieToBuyOrderStatementStruct {
 
 
 
-//il terzo attributo è in OUT
+//the third attribute is OUT
 typedef struct newSellOrderStatementStruct {
         MYSQL_STMT *stmt;
         MYSQL_BIND inParams[2];
@@ -116,7 +137,7 @@ typedef struct addSpecieToSellOrderStatementStruct {
 
 
 
-//il secondo attributo è in OUT
+//the second attribute is OUT
 typedef struct getCostoOrdineStatementStruct {
         MYSQL_STMT *stmt;
         MYSQL_BIND inParams[1];
@@ -150,7 +171,7 @@ typedef struct changePasswordStatementStruct {
 
 typedef struct addNewUserStatementStruct {
         MYSQL_STMT *stmt;
-        MYSQL_BIND inParams[6];
+        MYSQL_BIND inParams[3];
         MYSQL_BIND *outParams;
         int (*postExecFunc)(MYSQL_STMT *, MYSQL_BIND *);
         char username[MAX_USERNAME_LEN+1];
@@ -170,23 +191,7 @@ typedef struct dropUserStatementStruct {
 
 
 
-typedef struct getSpecieStatementStruct {
-        MYSQL_STMT *stmt;
-        MYSQL_BIND *inParams;
-        MYSQL_BIND outParams[8];
-        int (*postExecFunc)(MYSQL_STMT *, MYSQL_BIND *);
-        char nomeLatino[MAX_NOME_LATINO_LEN+1];
-        char colore[MAX_COLORE_LEN+1];
-        char nomeComune[MAX_NOME_COMUNE_LEN+1];
-        long giacenza;
-        unsigned long prezzo;
-        signed char esotica;
-        char giardAppart[MAX_GIARD_APPART_LEN+1];
-        char verdeFiorita[MAX_VERDE_FIORITA_LEN+1];
-} getSpecieStruct;
-
-
-
+void initGetSpecie(MYSQL *conn, getSpecieStruct *st);
 void initAddSpecie(MYSQL *conn, addSpecieStruct *st);
 void initSetPrezzo(MYSQL *conn, setPrezzoStruct *st);
 void initEditGiacenza(MYSQL *conn, editGiacenzaStruct *st);
@@ -200,4 +205,3 @@ void initConfirmPayment(MYSQL *conn, confirmPaymentStruct *st);
 void initChangePassword(MYSQL *conn, changePasswordStruct *st);
 void initAddNewUser(MYSQL *conn, addNewUserStruct *st);
 void initDropUser(MYSQL *conn, dropUserStruct *st);
-void initGetSpecie(MYSQL *conn, getSpecieStruct *st);

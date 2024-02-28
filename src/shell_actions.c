@@ -158,16 +158,51 @@ void changePassword(changePasswordStruct *st){
 
 	if(!EXEC_STMT(st))
 		printf("\nPassword changed successfully\n");
+
+	memset(st->newPsw, 0, MAX_PASSWORD_LEN);
 }
 
 
 
 void addNewUser(addNewUserStruct *st){
-	printf("Not yet implemented\n");
+
+	readUsername("Enter username of new user: ", st->username);
+	st->inParams[0].buffer_length = strlen(st->username);
+
+	readPassword("Enter initial password: ", st->password);
+	st->inParams[1].buffer_length = strlen(st->password);
+
+	unsigned sel = multipleChoice("Select role of the new user: ", "Manager" ,"Magazzino", "Segreteria", NULL);
+	switch(sel){
+		case 1:
+			strcpy(st->role, "manager");
+			st->inParams[2].buffer_length = strlen("manager");
+			break;
+		case 2:
+			strcpy(st->role, "magazzino");
+			st->inParams[2].buffer_length = strlen("magazzino");
+			break;
+		case 3:
+			strcpy(st->role, "segreteria");
+			st->inParams[2].buffer_length = strlen("segreteria");
+			break;
+		default:
+			err("should never happen");
+			break;
+	}
+
+	if(!EXEC_STMT(st))
+		printf("\nNew user created successfully\n");
+
+	memset(st->password, 0, MAX_PASSWORD_LEN);
 }
 
 
 
 void dropUser(dropUserStruct *st){
-	printf("Not yet implemented\n");
+	readUsername("Enter username of new user: ", st->username);
+	st->inParams[0].buffer_length = strlen(st->username);
+
+	if(!EXEC_STMT(st))
+		printf("\nUser deleted successfully\n");
 }
